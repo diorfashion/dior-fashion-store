@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>ديور للأزياء | Dior Fashion</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- Header -->
+  <header class="header">
+
+    <div class="logo-area">
+      <img
+        src="images/logo.jpg"
+        alt="Dior Fashion"
+        class="logo"
+      >
+    </div>
+
+    <div class="header-actions">
+
+      <button
+        class="icon-button"
+        onclick="scrollToProducts()"
+        aria-label="البحث"
+      >
+        🔍
+      </button>
+
+      <button
+        class="cart-button"
+        onclick="openCart()"
+      >
+        🛒
+        <span id="cartCount">0</span>
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <!-- Hero -->
+  <section class="hero">
+
+    <div class="hero-content">
+
+      <h1>ديور للأزياء</h1>
+
+      <p>
+        أناقتك تبدأ من هنا
+      </p>
+
+      <button
+        class="shop-button"
+        onclick="scrollToProducts()"
+      >
+        تسوقي الآن
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- Search -->
+  <section class="search-section">
+
+    <div class="search-box">
+
+      <span>🔍</span>
+
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="ابحثي عن منتج..."
+        oninput="searchProducts()"
+      >
+
+    </div>
+
+  </section>
+
+
+  <!-- Categories -->
+  <section class="categories-section">
+
+    <div class="section-title">
+      <h2>التصنيفات</h2>
+    </div>
+
+    <div class="categories">
+
+      <button onclick="filterCategory('فساتين نسائية')">
+        <span>👗</span>
+        <small>فساتين نسائية</small>
+      </button>
+
+      <button onclick="filterCategory('بدلات أطفال ولادي')">
+        <span>👦</span>
+        <small>ولادي</small>
+      </button>
+
+      <button onclick="filterCategory('بدلات أطفال بناتي')">
+        <span>👧</span>
+        <small>بناتي</small>
+      </button>
+
+      <button onclick="filterCategory('بجايم')">
+        <span>💤</span>
+        <small>بجايم</small>
+      </button>
+
+      <button onclick="filterCategory('ملابس نوم')">
+        <span>🌙</span>
+        <small>ملابس نوم</small>
+      </button>
+
+      <button onclick="filterCategory('طقومات نسائية')">
+        <span>👚</span>
+        <small>طقومات</small>
+      </button>
+
+      <button onclick="filterCategory('بناطيل')">
+        <span>👖</span>
+        <small>بناطيل</small>
+      </button>
+
+      <button onclick="filterCategory('بلايز')">
+        <span>👕</span>
+        <small>بلايز</small>
+      </button>
+
+      <button onclick="filterCategory('تنورات')">
+        <span>👗</span>
+        <small>تنورات</small>
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- Products -->
+  <main id="productsSection" class="products-section">
+
+    <div class="section-title">
+
+      <h2 id="productsTitle">
+        أحدث المنتجات
+      </h2>
+
+      <button
+        id="showAllButton"
+        onclick="showAllProducts()"
+        class="show-all"
+      >
+        عرض الكل
+      </button>
+
+    </div>
+
+    <div
+      id="productsGrid"
+      class="products-grid"
+    >
+      <div class="loading">
+        جاري تحميل المنتجات...
+      </div>
+    </div>
+
+  </main>
+
+
+  <!-- Cart -->
+  <div
+    id="cartOverlay"
+    class="overlay"
+    onclick="closeCart(event)"
+  >
+
+    <div
+      class="cart-panel"
+      onclick="event.stopPropagation()"
+    >
+
+      <div class="cart-header">
+
+        <h2>سلة التسوق</h2>
+
+        <button onclick="closeCart()">
+          ✕
+        </button>
+
+      </div>
+
+      <div id="cartItems"></div>
+
+      <div class="cart-footer">
+
+        <div class="total-row">
+          <span>الإجمالي</span>
+          <strong id="cartTotal">0 ريال</strong>
+        </div>
+
+        <button
+          class="checkout-button"
+          onclick="checkout()"
+        >
+          إتمام الطلب
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- Footer -->
+  <footer>
+
+    <img
+      src="images/logo.jpg"
+      alt="Dior Fashion"
+    >
+
+    <p>ديور للأزياء</p>
+
+    <span>
+      جميع الحقوق محفوظة © 2026
+    </span>
+
+  </footer>
+
+
+  <script src="app.js"></script>
+
+</body>
+</html>
