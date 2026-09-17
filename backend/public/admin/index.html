@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+
+<html lang="ar" dir="rtl">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>لوحة الإدارة | ديور للأزياء</title>
+
+  <link
+    rel="stylesheet"
+    href="admin.css"
+  >
+
+</head>
+
+<body>
+
+  <header class="admin-header">
+
+    <div class="admin-brand">
+
+      <img
+        src="../images/logo.jpg"
+        alt="ديور للأزياء"
+      >
+
+      <div>
+        <strong>
+          ديور للأزياء
+        </strong>
+
+        <small>
+          لوحة الإدارة
+        </small>
+      </div>
+
+    </div>
+
+    <button
+      onclick="logout()"
+      class="logout-button"
+    >
+      تسجيل الخروج
+    </button>
+
+  </header>
+
+
+  <main class="admin-container">
+
+
+    <section class="stats">
+
+      <div class="stat-card">
+
+        <span>
+          📦
+        </span>
+
+        <div>
+
+          <small>
+            المنتجات
+          </small>
+
+          <strong id="productCount">
+            0
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div class="stat-card">
+
+        <span>
+          🛒
+        </span>
+
+        <div>
+
+          <small>
+            الطلبات
+          </small>
+
+          <strong>
+            قريبًا
+          </strong>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <section class="admin-section">
+
+      <div class="section-header">
+
+        <h1>
+          المنتجات
+        </h1>
+
+        <button
+          class="primary-button"
+          onclick="openProductForm()"
+        >
+          + إضافة منتج
+        </button>
+
+      </div>
+
+
+      <div
+        id="productsGrid"
+        class="admin-products"
+      ></div>
+
+    </section>
+
+
+  </main>
+
+
+  <!-- نافذة إضافة / تعديل المنتج -->
+
+  <div
+    id="productModal"
+    class="modal"
+  >
+
+    <div class="modal-card">
+
+      <div class="modal-header">
+
+        <h2 id="formTitle">
+          إضافة منتج
+        </h2>
+
+        <button
+          onclick="closeProductForm()"
+        >
+          ✕
+        </button>
+
+      </div>
+
+
+      <form id="productForm">
+
+
+        <input
+          type="hidden"
+          id="productId"
+        >
+
+
+        <label>
+          اسم المنتج
+        </label>
+
+        <input
+          id="name"
+          required
+          placeholder="مثال: فستان نسائي"
+        >
+
+
+        <label>
+          السعر
+        </label>
+
+        <input
+          id="price"
+          type="number"
+          min="0"
+          required
+          placeholder="35000"
+        >
+
+
+        <label>
+          السعر قبل الخصم
+        </label>
+
+        <input
+          id="oldPrice"
+          type="number"
+          min="0"
+          placeholder="45000"
+        >
+
+
+        <label>
+          التصنيف
+        </label>
+
+        <select
+          id="category"
+          required
+        >
+
+          <option value="">
+            اختر التصنيف
+          </option>
+
+          <option>
+            فساتين نسائية
+          </option>
+
+          <option>
+            بدلات أطفال ولادي
+          </option>
+
+          <option>
+            بدلات أطفال بناتي
+          </option>
+
+          <option>
+            بجايم
+          </option>
+
+          <option>
+            ملابس نوم
+          </option>
+
+          <option>
+            طقومات نسائية
+          </option>
+
+          <option>
+            بناطيل
+          </option>
+
+          <option>
+            بلايز
+          </option>
+
+          <option>
+            تنورات
+          </option>
+
+        </select>
+
+
+        <label>
+          الوصف
+        </label>
+
+        <textarea
+          id="description"
+          rows="4"
+          placeholder="تفاصيل المنتج..."
+        ></textarea>
+
+
+        <label>
+          المخزون
+        </label>
+
+        <input
+          id="stock"
+          type="number"
+          min="0"
+          value="0"
+        >
+
+
+        <label>
+          صور المنتج
+        </label>
+
+        <div id="imageInputs">
+
+          <div class="image-input-row">
+
+            <input
+              class="image-url"
+              placeholder="https://example.com/image.jpg"
+              required
+            >
+
+          </div>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="add-image-button"
+          onclick="addImageInput()"
+        >
+          + إضافة رابط صورة
+        </button>
+
+
+        <label class="checkbox-label">
+
+          <input
+            type="checkbox"
+            id="isAvailable"
+            checked
+          >
+
+          المنتج متوفر
+
+        </label>
+
+
+        <button
+          type="submit"
+          class="save-button"
+        >
+          حفظ المنتج
+        </button>
+
+
+        <div id="formMessage"></div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+
+  <script src="admin.js"></script>
+
+</body>
+
+</html>
