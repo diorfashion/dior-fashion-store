@@ -5,7 +5,7 @@ const requireAdmin =
 const router = express.Router();
 
 // إضافة منتج
-router.post("/", async (req, res) => {
+router.post("/", requireAdmin, async (req, res) => {
   try {
     const product = await Product.create(req.body);
 
@@ -66,7 +66,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // تعديل منتج
-router.put("/:id", async (req, res) => {
+router.put("/:id", requireAdmin, async (req, res) => {
   try {
     const product = await Product.findByIdAndUpdate(
       req.params.id,
@@ -98,7 +98,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // حذف منتج
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", requireAdmin, async (req, res) => {
   try {
     const product = await Product.findByIdAndDelete(
       req.params.id
