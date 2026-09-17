@@ -1,6 +1,7 @@
 const express = require("express");
 const Product = require("../models/Product");
-
+const requireAdmin =
+  require("../middleware/authMiddleware");
 const router = express.Router();
 
 // إضافة منتج
