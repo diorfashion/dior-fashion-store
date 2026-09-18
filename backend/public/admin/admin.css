@@ -574,5 +574,113 @@ select:focus {
 
   flex-shrink: 0;
   }
+  /* ==========================================
+   إشعارات الأدمن
+========================================== */
+
+.admin-push-box {
+  margin: 20px auto;
+  padding: 20px;
+  max-width: 900px;
+
+  background: #ffffff;
+  border: 1px solid #e9e9e9;
+  border-radius: 18px;
+
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.06);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.admin-push-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.admin-push-icon {
+  width: 52px;
+  height: 52px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 15px;
+
+  background: #f7f7f7;
+
+  font-size: 25px;
+}
+
+.admin-push-content h3 {
+  margin: 0 0 5px;
+  font-size: 18px;
+}
+
+.admin-push-content p {
+  margin: 0;
+  color: #777;
+  font-size: 14px;
+}
+
+.admin-push-button {
+  border: none;
+  padding: 13px 20px;
+
+  border-radius: 12px;
+
+  background: #111;
+  color: white;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.admin-push-button:hover {
+  transform: translateY(-1px);
+  opacity: 0.9;
+}
+
+.admin-push-button:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.admin-notification-message {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.admin-notification-message.success {
+  color: #16833b;
+}
+
+.admin-notification-message.error {
+  color: #c62828;
+}
+
+@media (max-width: 700px) {
+
+  .admin-push-box {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-push-button {
+    width: 100%;
+  }
+
+}
 
 }
