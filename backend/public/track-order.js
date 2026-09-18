@@ -175,10 +175,12 @@ function renderOrder(order) {
             ${
               item.image
                 ? `
-                  <img
-                    src="${escapeHtml(item.image)}"
-                    alt=""
-                  >
+                <img
+  src="${escapeHtml(item.image)}"
+  alt="${escapeHtml(item.name || "منتج")}"
+  class="order-product-image"
+  onerror="this.onerror=null; this.src='images/logo.jpg';"
+>
                 `
                 : `
                   <div
