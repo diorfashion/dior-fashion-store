@@ -128,6 +128,13 @@ function renderProducts(products) {
   }).join("");
 }
 
+function openProduct(productId) {
+
+  window.location.href =
+    `/product.html?id=${encodeURIComponent(productId)}`;
+
+}
+
 // البحث
 
 function searchProducts() {
