@@ -656,22 +656,12 @@ await navigator.serviceWorker.ready;
     }
 
 
-    // --------------------------------------
-    // حفظ الاشتراك في السيرفر
-    // --------------------------------------
+ // --------------------------------------
+// حفظ الاشتراك في السيرفر
+// --------------------------------------
 
-    const saveResponse =
-      await fetch(
-        "/api/push/subscribe",
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
-
-          const subscriptionData = subscription.toJSON();
+const subscriptionData =
+  subscription.toJSON();
 
 const saveResponse =
   await fetch(
@@ -680,7 +670,8 @@ const saveResponse =
       method: "POST",
 
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type":
+          "application/json"
       },
 
       body: JSON.stringify({
@@ -690,43 +681,40 @@ const saveResponse =
     }
   );
 
-        }
-      );
+
+const saveData =
+  await saveResponse.json();
 
 
-    const saveData =
-      await saveResponse.json();
+if (
+  !saveResponse.ok ||
+  !saveData.success
+) {
+
+  throw new Error(
+    saveData.message ||
+    "تعذر حفظ اشتراك الإشعارات"
+  );
+
+}
 
 
-    if (
-      !saveResponse.ok ||
-      !saveData.success
-    ) {
+// --------------------------------------
+// نجاح
+// --------------------------------------
 
-      throw new Error(
-        saveData.message ||
-        "تعذر حفظ اشتراك الإشعارات"
-      );
-
-    }
+showNotificationMessage(
+  "✅ تم تفعيل إشعارات طلباتك بنجاح.",
+  "success"
+);
 
 
-    // --------------------------------------
-    // نجاح
-    // --------------------------------------
-
-    showNotificationMessage(
-      "✅ تم تفعيل إشعارات طلباتك بنجاح.",
-      "success"
-    );
+enableNotificationsButton.textContent =
+  "✅ إشعارات الطلب مفعّلة";
 
 
-    enableNotificationsButton.textContent =
-      "✅ إشعارات الطلب مفعّلة";
-
-
-    enableNotificationsButton.disabled =
-      true;
+enableNotificationsButton.disabled =
+  true;
 
 
   } catch (error) {
