@@ -159,57 +159,136 @@ router.post(
   "/admin/subscribe",
   requireAdmin,
   async (req, res) => {
+
     try {
 
-      const { subscription } = req.body;
+      const subscription =
+        req.body?.subscription;
+
 
       // =====================================
-      // التحقق من بيانات الاشتراك
+      // التحقق من وجود الاشتراك
       // =====================================
 
       if (
         !subscription ||
-        typeof subscription !== "object" ||
-        !subscription.endpoint ||
-        !subscription.keys ||
-        !subscription.keys.p256dh ||
-        !subscription.keys.auth
+        typeof subscription !== "object"
       ) {
 
         return res.status(400).json({
+
           success: false,
-          message: "بيانات اشتراك الادمن غير صحيحة"
+
+          message:
+            "بيانات اشتراك الادمن غير صحيحة"
+
         });
 
       }
 
 
       // =====================================
-      // البحث عن الاشتراك الموجود
+      // التحقق من Endpoint
+      // =====================================
+
+      if (
+        typeof subscription.endpoint !== "string" ||
+        !subscription.endpoint.trim()
+      ) {
+
+        return res.status(400).json({
+
+          success: false,
+
+          message:
+            "بيانات اشتراك الادمن غير صحيحة"
+
+        });
+
+      }
+
+
+      // =====================================
+      // التحقق من Keys
+      // =====================================
+
+      if (
+        !subscription.keys ||
+        typeof subscription.keys !== "object" ||
+        typeof subscription.keys.p256dh !== "string" ||
+        typeof subscription.keys.auth !== "string" ||
+        !subscription.keys.p256dh ||
+        !subscription.keys.auth
+      ) {
+
+        return res.status(400).json({
+
+          success: false,
+
+          message:
+            "بيانات اشتراك الادمن غير صحيحة"
+
+        });
+
+      }
+
+
+      // =====================================
+      // تنظيف البيانات
+      // =====================================
+
+      const cleanSubscription = {
+
+        endpoint:
+          subscription.endpoint,
+
+        expirationTime:
+          subscription.expirationTime ?? null,
+
+        keys: {
+
+          p256dh:
+            subscription.keys.p256dh,
+
+          auth:
+            subscription.keys.auth
+
+        }
+
+      };
+
+
+      // =====================================
+      // البحث عن الجهاز
       // =====================================
 
       const existing =
         await AdminPushSubscription.findOne({
+
           "subscription.endpoint":
-            subscription.endpoint
+            cleanSubscription.endpoint
+
         });
 
 
       // =====================================
-      // تحديث الاشتراك إذا كان موجودًا
+      // تحديث الاشتراك الموجود
       // =====================================
 
       if (existing) {
 
         existing.subscription =
-          subscription;
+          cleanSubscription;
 
         await existing.save();
 
         return res.json({
+
           success: true,
+
           message:
             "تم تحديث اشتراك إشعارات الأدمن"
+
         });
 
       }
@@ -220,14 +299,24 @@ router.post(
       // =====================================
 
       await AdminPushSubscription.create({
-        subscription
+
+        subscription:
+          cleanSubscription
+
       });
 
 
-      res.status(201).json({
+      // =====================================
+      // الرد
+      // =====================================
+
+      return res.status(201).json({
+
         success: true,
+
         message:
           "تم حفظ اشتراك إشعارات الأدمن"
+
       });
 
     } catch (error) {
@@ -237,13 +326,36 @@ router.post(
         error
       );
 
-      res.status(500).json({
+
+      // =====================================
+      // الاشتراك موجود بالفعل
+      // =====================================
+
+      if (error.code === 11000) {
+
+        return res.json({
+
+          success: true,
+
+          message:
+            "تم تفعيل إشعارات الأدمن بالفعل"
+
+        });
+
+      }
+
+
+      return res.status(500).json({
+
         success: false,
+
         message:
           "تعذر حفظ اشتراك إشعارات الأدمن"
+
       });
 
     }
+
   }
 );
 
