@@ -16,23 +16,33 @@
     href="style.css"
   >
 
+  <!-- Leaflet -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  >
+
   <style>
+
     .checkout-page {
       max-width: 1000px;
       margin: 30px auto;
       padding: 20px;
     }
 
+
     .checkout-title {
       text-align: center;
       margin-bottom: 25px;
     }
+
 
     .checkout-layout {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 25px;
     }
+
 
     .checkout-card {
       background: white;
@@ -41,15 +51,18 @@
       box-shadow: 0 4px 18px rgba(0,0,0,.06);
     }
 
+
     .checkout-card h2 {
       margin-top: 0;
     }
+
 
     .checkout-form label {
       display: block;
       margin: 15px 0 7px;
       font-weight: bold;
     }
+
 
     .checkout-form input,
     .checkout-form textarea,
@@ -61,12 +74,15 @@
       border-radius: 10px;
       font-family: inherit;
       font-size: 15px;
+      background: white;
     }
+
 
     .checkout-form textarea {
       min-height: 90px;
       resize: vertical;
     }
+
 
     .map-box {
       border: 2px dashed #ccc;
@@ -76,6 +92,12 @@
       margin-top: 10px;
     }
 
+
+    .map-box strong {
+      font-size: 17px;
+    }
+
+
     .map-button {
       border: none;
       padding: 12px 18px;
@@ -83,13 +105,61 @@
       cursor: pointer;
       background: #eee;
       font-family: inherit;
+      font-size: 15px;
+      margin-top: 8px;
     }
+
+
+    .map-button:hover {
+      opacity: .85;
+    }
+
 
     .location-text {
       margin-top: 10px;
       color: #555;
       line-height: 1.7;
     }
+
+
+    /* =========================
+       صندوق محفظة جيب
+    ========================= */
+
+    #jeebPaymentBox {
+      animation: fadeIn .25s ease;
+    }
+
+
+    #jeebPaymentBox h3 {
+      margin-top: 0;
+    }
+
+
+    #jeebPaymentBox strong {
+      font-size: 18px;
+    }
+
+
+    #jeebPaymentBox .map-button {
+      width: 100%;
+      background: #111;
+      color: white;
+    }
+
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-5px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
 
     .order-item {
       display: flex;
@@ -99,6 +169,7 @@
       border-bottom: 1px solid #eee;
     }
 
+
     .order-item img {
       width: 70px;
       height: 70px;
@@ -106,20 +177,24 @@
       border-radius: 10px;
     }
 
+
     .order-item-info {
       flex: 1;
     }
+
 
     .order-item-info strong {
       display: block;
       margin-bottom: 5px;
     }
 
+
     .summary-row {
       display: flex;
       justify-content: space-between;
       padding: 10px 0;
     }
+
 
     .summary-total {
       border-top: 1px solid #ddd;
@@ -128,6 +203,7 @@
       font-size: 20px;
       font-weight: bold;
     }
+
 
     .submit-order {
       width: 100%;
@@ -142,24 +218,29 @@
       cursor: pointer;
     }
 
+
     .submit-order:disabled {
       opacity: .5;
       cursor: not-allowed;
     }
+
 
     .empty-checkout {
       text-align: center;
       padding: 50px 20px;
     }
 
+
     .success-box {
       text-align: center;
       padding: 40px 20px;
     }
 
+
     .success-box h2 {
       margin-bottom: 15px;
     }
+
 
     .order-number {
       font-size: 22px;
@@ -167,17 +248,67 @@
       margin: 20px 0;
     }
 
+
+    /* =========================
+       أزرار النجاح
+    ========================= */
+
+    .success-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+
+    .success-actions .map-button {
+      min-width: 180px;
+    }
+
+
+    /* =========================
+       الهاتف
+    ========================= */
+
     @media (max-width: 700px) {
+
+      .checkout-page {
+        margin: 10px auto;
+        padding: 12px;
+      }
+
+
       .checkout-layout {
         grid-template-columns: 1fr;
       }
+
+
+      .checkout-card {
+        padding: 17px;
+      }
+
+
+      #map {
+        height: 300px !important;
+      }
+
+
+      .success-actions {
+        flex-direction: column;
+      }
+
+
+      .success-actions .map-button {
+        width: 100%;
+      }
+
     }
+
   </style>
-<link
-  rel="stylesheet"
-  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-/>
+
 </head>
+
 
 <body>
 
@@ -187,14 +318,21 @@
       إتمام الطلب
     </h1>
 
+
     <div id="checkoutContent">
       جاري تحميل الطلب...
     </div>
 
   </main>
-<script
-  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-></script>
+
+
+  <!-- Leaflet -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  ></script>
+
+
+  <!-- Checkout -->
   <script src="checkout.js"></script>
 
 </body>
