@@ -236,23 +236,23 @@ async function enableAdminNotifications() {
     // --------------------------------------
 
     const saveResponse =
-      await fetch(
-        "/api/push/admin/subscribe",
-        {
-          method: "POST",
+  await fetch(
+    "/api/push/admin/subscribe",
+    {
+      method: "POST",
 
-          credentials: "include",
+      credentials: "include",
 
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
+      headers: {
+        "Content-Type":
+          "application/json"
+      },
 
-          body: JSON.stringify({
-            subscription
-          })
-        }
-      );
+      body: JSON.stringify({
+        subscription: subscription.toJSON()
+      })
+    }
+  );
 
 
     const saveData =
