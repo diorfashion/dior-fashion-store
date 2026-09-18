@@ -1,3 +1,13 @@
+// ==========================================
+// Service Worker - ديور للأزياء
+// Web Push Notifications
+// ==========================================
+
+
+// ==========================================
+// استقبال الإشعار
+// ==========================================
+
 self.addEventListener("push", function (event) {
 
   let data = {};
@@ -10,8 +20,12 @@ self.addEventListener("push", function (event) {
 
   } catch (error) {
 
-    data = {};
+    console.error(
+      "Push data parse error:",
+      error
+    );
 
+    data = {};
   }
 
 
@@ -28,10 +42,12 @@ self.addEventListener("push", function (event) {
 
 
     icon:
+      data.icon ||
       "/images/logo.jpg",
 
 
     badge:
+      data.badge ||
       "/images/logo.jpg",
 
 
@@ -52,6 +68,10 @@ self.addEventListener("push", function (event) {
       100,
       200
     ],
+
+
+    timestamp:
+      Date.now(),
 
 
     data: {
@@ -78,7 +98,7 @@ self.addEventListener("push", function (event) {
 
 
 // ==========================================
-// عند الضغط على الإشعار
+// الضغط على الإشعار
 // ==========================================
 
 self.addEventListener(
@@ -89,6 +109,7 @@ self.addEventListener(
 
 
     const url =
+      event.notification &&
       event.notification.data &&
       event.notification.data.url
         ? event.notification.data.url
@@ -110,7 +131,10 @@ self.addEventListener(
       .then(function (clientList) {
 
 
-        // إذا كانت الصفحة مفتوحة
+        // ==================================
+        // إذا كان الموقع مفتوحًا
+        // ==================================
+
         for (
           const client
           of clientList
@@ -120,18 +144,33 @@ self.addEventListener(
             "focus" in client
           ) {
 
-            client.navigate(url);
+            return client
+              .focus()
+              .then(function () {
 
-            return client.focus();
+                if (
+                  "navigate" in client
+                ) {
+
+                  return client.navigate(
+                    url
+                  );
+
+                }
+
+              });
 
           }
 
         }
 
 
-        // إذا لم تكن الصفحة مفتوحة
+        // ==================================
+        // إذا لم يكن الموقع مفتوحًا
+        // ==================================
+
         if (
-          clients.openWindow
+          "openWindow" in clients
         ) {
 
           return clients.openWindow(
@@ -142,6 +181,36 @@ self.addEventListener(
 
       })
 
+    );
+
+  }
+);
+
+
+// ==========================================
+// تثبيت Service Worker
+// ==========================================
+
+self.addEventListener(
+  "install",
+  function () {
+
+    self.skipWaiting();
+
+  }
+);
+
+
+// ==========================================
+// تفعيل Service Worker
+// ==========================================
+
+self.addEventListener(
+  "activate",
+  function (event) {
+
+    event.waitUntil(
+      self.clients.claim()
     );
 
   }
