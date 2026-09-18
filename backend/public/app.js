@@ -82,7 +82,10 @@ function renderProducts(products) {
         : "";
 
     return `
-      <article class="product-card">
+      <article
+        class="product-card"
+        onclick="openProduct('${product._id}')"
+      >
 
         <img
           class="product-image"
@@ -109,7 +112,10 @@ function renderProducts(products) {
 
           <button
             class="add-cart"
-            onclick="addToCart('${product._id}')"
+            onclick="
+              event.stopPropagation();
+              addToCart('${product._id}')
+            "
           >
             🛒 إضافة إلى السلة
           </button>
@@ -121,7 +127,6 @@ function renderProducts(products) {
 
   }).join("");
 }
-
 
 // البحث
 
