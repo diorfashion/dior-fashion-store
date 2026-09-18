@@ -44,12 +44,16 @@ router.get("/", async (req, res) => {
 // عرض منتج واحد
 router.get("/:id", async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+
+    const product =
+      await Product.findById(
+        req.params.id
+      );
 
     if (!product) {
       return res.status(404).json({
         success: false,
-        message: "Product not found"
+        message: "المنتج غير موجود"
       });
     }
 
@@ -57,11 +61,14 @@ router.get("/:id", async (req, res) => {
       success: true,
       product
     });
+
   } catch (error) {
-    res.status(400).json({
+
+    res.status(500).json({
       success: false,
-      message: "Invalid product ID"
+      message: "حدث خطأ في الخادم"
     });
+
   }
 });
 
