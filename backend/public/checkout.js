@@ -12,6 +12,18 @@ let selectedLongitude = null;
 
 
 // =========================
+// إعدادات المتجر
+// =========================
+
+// رقم محفظة جيب
+// يتم وضعه لاحقًا في Koyeb Environment Variables
+const JEEB_WALLET_NUMBER = "773041464";
+
+// رقم واتساب الإدارة
+const ADMIN_WHATSAPP_NUMBER = "967773041464";
+
+
+// =========================
 // الخريطة
 // =========================
 
@@ -390,14 +402,73 @@ function renderCheckout() {
             </option>
 
             <option value="الدفع عند الاستلام">
-              الدفع عند الاستلام
+              💵 الدفع عند الاستلام
             </option>
 
             <option value="تحويل بنكي">
-              تحويل بنكي
+              🏦 تحويل بنكي
+            </option>
+
+            <option value="محفظة جيب">
+              📱 محفظة جيب
             </option>
 
           </select>
+
+
+          <!-- معلومات محفظة جيب -->
+
+          <div
+            id="jeebPaymentBox"
+            style="
+              display:none;
+              margin-top:15px;
+              padding:15px;
+              border-radius:12px;
+              background:#f5f5f5;
+              border:1px solid #ddd;
+            "
+          >
+
+            <h3>
+              📱 الدفع عبر محفظة جيب
+            </h3>
+
+            <p>
+              يرجى تحويل المبلغ المطلوب إلى:
+            </p>
+
+            <div
+              style="
+                font-size:22px;
+                font-weight:bold;
+                margin:10px 0;
+              "
+            >
+              ${JEEB_WALLET_NUMBER}
+            </div>
+
+            <p>
+              المبلغ المطلوب:
+              <strong>
+                ${formatPrice(total)}
+              </strong>
+            </p>
+
+            <p>
+              بعد التحويل، يرجى إرسال إشعار الدفع
+              إلى واتساب الإدارة.
+            </p>
+
+            <button
+              type="button"
+              class="map-button"
+              id="jeebWhatsAppButton"
+            >
+              📱 إرسال إشعار الدفع عبر واتساب
+            </button>
+
+          </div>
 
 
           <button
@@ -525,6 +596,102 @@ function renderCheckout() {
   `;
 
 
+  // =========================
+  // تغيير طريقة الدفع
+  // =========================
+
+  const paymentMethod =
+    document.getElementById(
+      "paymentMethod"
+    );
+
+  const jeebPaymentBox =
+    document.getElementById(
+      "jeebPaymentBox"
+    );
+
+
+  paymentMethod.addEventListener(
+    "change",
+    function() {
+
+      if (
+        this.value === "محفظة جيب"
+      ) {
+
+        jeebPaymentBox.style.display =
+          "block";
+
+      } else {
+
+        jeebPaymentBox.style.display =
+          "none";
+
+      }
+
+    }
+  );
+
+
+  // =========================
+  // زر واتساب الدفع
+  // =========================
+
+  const jeebWhatsAppButton =
+    document.getElementById(
+      "jeebWhatsAppButton"
+    );
+
+
+  jeebWhatsAppButton.addEventListener(
+    "click",
+    function() {
+
+      const customerName =
+        document
+          .getElementById(
+            "customerName"
+          )
+          .value
+          .trim();
+
+
+      const customerPhone =
+        document
+          .getElementById(
+            "customerPhone"
+          )
+          .value
+          .trim();
+
+
+      const message =
+
+`مرحبًا ديور للأزياء 👋
+
+أريد الدفع عبر محفظة جيب.
+
+الاسم: ${customerName || "غير محدد"}
+رقم العميل: ${customerPhone || "غير محدد"}
+
+المبلغ المطلوب: ${formatPrice(total)}
+
+رقم محفظة جيب:
+${JEEB_WALLET_NUMBER}
+
+يرجى تأكيد استلام الدفع.
+`;
+
+
+      openWhatsApp(
+        ADMIN_WHATSAPP_NUMBER,
+        message
+      );
+
+    }
+  );
+
+
   // ربط زر تأكيد الطلب
 
   document
@@ -535,7 +702,7 @@ function renderCheckout() {
     );
 
 
-  // تشغيل الخريطة بعد ظهورها
+  // تشغيل الخريطة
 
   setTimeout(
     () => {
@@ -555,8 +722,6 @@ async function submitOrder(event) {
 
   event.preventDefault();
 
-
-  // التأكد من تحديد الموقع
 
   if (
     selectedLatitude === null ||
@@ -589,6 +754,14 @@ async function submitOrder(event) {
 
 
   const deliveryFee = 0;
+
+
+  const paymentMethod =
+    document
+      .getElementById(
+        "paymentMethod"
+      )
+      .value;
 
 
   const payload = {
@@ -641,12 +814,7 @@ async function submitOrder(event) {
     },
 
 
-    paymentMethod:
-      document
-        .getElementById(
-          "paymentMethod"
-        )
-        .value,
+    paymentMethod,
 
 
     items:
@@ -712,7 +880,8 @@ async function submitOrder(event) {
 
 
     showOrderSuccess(
-      data.order
+      data.order,
+      paymentMethod
     );
 
 
@@ -743,12 +912,74 @@ async function submitOrder(event) {
 // نجاح الطلب
 // =========================
 
-function showOrderSuccess(order) {
+function showOrderSuccess(
+  order,
+  paymentMethod
+) {
 
   const container =
     document.getElementById(
       "checkoutContent"
     );
+
+
+  let paymentMessage = "";
+
+
+  if (
+    paymentMethod === "محفظة جيب"
+  ) {
+
+    paymentMessage = `
+
+      <div
+        style="
+          margin-top:15px;
+          padding:15px;
+          border-radius:12px;
+          background:#f5f5f5;
+        "
+      >
+
+        <h3>
+          📱 الدفع عبر محفظة جيب
+        </h3>
+
+        <p>
+          رقم المحفظة:
+          <strong>
+            ${JEEB_WALLET_NUMBER}
+          </strong>
+        </p>
+
+        <p>
+          المبلغ المطلوب:
+          <strong>
+            ${formatPrice(order.total)}
+          </strong>
+        </p>
+
+        <p>
+          بعد الدفع أرسل إشعار الدفع إلى
+          واتساب الإدارة.
+        </p>
+
+        <button
+          class="map-button"
+          onclick="sendPaymentWhatsApp(
+            '${escapeHtml(order.orderNumber)}',
+            '${escapeHtml(order.total)}'
+          )"
+        >
+          📱 إرسال إشعار الدفع
+        </button>
+
+      </div>
+
+    `;
+
+  }
+
 
   container.innerHTML = `
 
@@ -770,6 +1001,18 @@ function showOrderSuccess(order) {
         )}
 
       </div>
+
+      <p>
+
+        طريقة الدفع:
+
+        <strong>
+          ${escapeHtml(
+            paymentMethod
+          )}
+        </strong>
+
+      </p>
 
       <p>
 
@@ -795,16 +1038,164 @@ function showOrderSuccess(order) {
 
       </p>
 
-      <button
-        class="map-button"
-        onclick="window.location.href='/'"
+      ${paymentMessage}
+
+
+      <div
+        style="
+          display:flex;
+          gap:10px;
+          flex-wrap:wrap;
+          margin-top:20px;
+        "
       >
-        العودة للمتجر
-      </button>
+
+        <button
+          class="map-button"
+          onclick="
+            window.location.href =
+            '/track-order.html?order=${encodeURIComponent(
+              order.orderNumber
+            )}'
+          "
+        >
+          🔎 تتبع الطلب
+        </button>
+
+
+        <button
+          class="map-button"
+          onclick="
+            sendOrderWhatsApp(
+              '${escapeHtml(
+                order.orderNumber
+              )}',
+              '${escapeHtml(
+                paymentMethod
+              )}',
+              '${escapeHtml(
+                order.status
+              )}',
+              '${escapeHtml(
+                order.total
+              )}'
+            )
+          "
+        >
+          📱 إرسال تفاصيل الطلب عبر واتساب
+        </button>
+
+
+        <button
+          class="map-button"
+          onclick="window.location.href='/'"
+        >
+          العودة للمتجر
+        </button>
+
+      </div>
 
     </div>
 
   `;
+}
+
+
+// =========================
+// رسالة الطلب عبر واتساب
+// =========================
+
+function sendOrderWhatsApp(
+  orderNumber,
+  paymentMethod,
+  status,
+  total
+) {
+
+  const message =
+
+`طلب جديد - ديور للأزياء 🛍️
+
+رقم الطلب: ${orderNumber}
+
+طريقة الدفع:
+${paymentMethod}
+
+حالة الطلب:
+${status}
+
+الإجمالي:
+${formatPrice(total)}
+
+يرجى مراجعة الطلب من لوحة الإدارة.
+`;
+
+
+  openWhatsApp(
+    ADMIN_WHATSAPP_NUMBER,
+    message
+  );
+}
+
+
+// =========================
+// إشعار دفع جيب
+// =========================
+
+function sendPaymentWhatsApp(
+  orderNumber,
+  total
+) {
+
+  const message =
+
+`إشعار دفع - ديور للأزياء 💰
+
+رقم الطلب:
+${orderNumber}
+
+طريقة الدفع:
+محفظة جيب
+
+المبلغ:
+${formatPrice(total)}
+
+تم إرسال المبلغ إلى محفظة جيب.
+
+يرجى مراجعة الدفع وتأكيد الطلب.
+`;
+
+
+  openWhatsApp(
+    ADMIN_WHATSAPP_NUMBER,
+    message
+  );
+}
+
+
+// =========================
+// فتح واتساب
+// =========================
+
+function openWhatsApp(
+  phone,
+  message
+) {
+
+  const url =
+    "https://wa.me/" +
+    phone +
+    "?text=" +
+    encodeURIComponent(
+      message
+    );
+
+
+  window.open(
+    url,
+    "_blank"
+  );
+
 }
 
 
