@@ -464,9 +464,8 @@ function checkout() {
     return;
   }
 
-  alert(
-    "سنضيف صفحة إتمام الطلب والخريطة في المرحلة القادمة."
-  );
+  window.location.href =
+    "/checkout.html";
 }
 
 
