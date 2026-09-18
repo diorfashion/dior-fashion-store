@@ -69,17 +69,27 @@ const orderSchema = new mongoose.Schema(
     },
 
     delivery: {
-      address: {
-        type: String,
-        required: true,
-        trim: true
-      },
+  address: {
+    type: String,
+    required: true,
+    trim: true
+  },
 
-      notes: {
-        type: String,
-        default: ""
-      }
-    },
+  latitude: {
+    type: Number,
+    required: true
+  },
+
+  longitude: {
+    type: Number,
+    required: true
+  },
+
+  notes: {
+    type: String,
+    default: ""
+  }
+},
 
     paymentMethod: {
       type: String,
