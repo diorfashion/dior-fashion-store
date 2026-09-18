@@ -399,3 +399,369 @@ function escapeHtml(value) {
     );
 
 }
+// ==========================================
+// تفعيل إشعارات الطلب
+// ==========================================
+
+const enableNotificationsButton =
+  document.getElementById(
+    "enableNotificationsButton"
+  );
+
+const notificationMessage =
+  document.getElementById(
+    "notificationMessage"
+  );
+
+
+// ==========================================
+// تحويل مفتاح VAPID من Base64 URL
+// إلى Uint8Array
+// ==========================================
+
+function urlBase64ToUint8Array(
+  base64String
+) {
+
+  const padding =
+    "=".repeat(
+      (4 - base64String.length % 4) % 4
+    );
+
+  const base64 =
+    (
+      base64String +
+      padding
+    )
+      .replace(/-/g, "+")
+      .replace(/_/g, "/");
+
+
+  const rawData =
+    window.atob(base64);
+
+
+  return Uint8Array.from(
+    [...rawData].map(
+      char => char.charCodeAt(0)
+    )
+  );
+
+}
+
+
+// ==========================================
+// رسالة للمستخدم
+// ==========================================
+
+function showNotificationMessage(
+  message,
+  type = ""
+) {
+
+  if (!notificationMessage) {
+    return;
+  }
+
+
+  notificationMessage.textContent =
+    message;
+
+
+  notificationMessage.className =
+    "notification-message";
+
+
+  if (type) {
+    notificationMessage.classList.add(
+      type
+    );
+  }
+
+}
+
+
+// ==========================================
+// تفعيل الإشعارات
+// ==========================================
+
+async function enableOrderNotifications() {
+
+  try {
+
+    // --------------------------------------
+    // التأكد من دعم المتصفح
+    // --------------------------------------
+
+    if (
+      !("serviceWorker" in navigator)
+    ) {
+
+      showNotificationMessage(
+        "متصفحك لا يدعم إشعارات الطلبات.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if (
+      !("PushManager" in window)
+    ) {
+
+      showNotificationMessage(
+        "متصفحك لا يدعم إشعارات الطلبات.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if (
+      !("Notification" in window)
+    ) {
+
+      showNotificationMessage(
+        "متصفحك لا يدعم إشعارات المتصفح.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    // --------------------------------------
+    // الحصول على رقم الهاتف
+    // --------------------------------------
+
+    const phoneInput =
+      document.getElementById(
+        "customerPhone"
+      );
+
+
+    const phone =
+      phoneInput
+        ? String(
+            phoneInput.value || ""
+          ).trim()
+        : "";
+
+
+    if (!phone) {
+
+      showNotificationMessage(
+        "أدخل رقم هاتفك أولاً ثم فعّل الإشعارات.",
+        "error"
+      );
+
+      if (phoneInput) {
+        phoneInput.focus();
+      }
+
+      return;
+    }
+
+
+    // --------------------------------------
+    // تسجيل Service Worker
+    // --------------------------------------
+
+    showNotificationMessage(
+      "جاري تجهيز الإشعارات..."
+    );
+
+
+    const registration =
+      await navigator.serviceWorker.register(
+        "/service-worker.js"
+      );
+
+
+    await navigator.serviceWorker.ready;
+
+
+    // --------------------------------------
+    // طلب إذن الإشعارات
+    // --------------------------------------
+
+    let permission =
+      Notification.permission;
+
+
+    if (
+      permission === "default"
+    ) {
+
+      permission =
+        await Notification.requestPermission();
+
+    }
+
+
+    if (
+      permission !== "granted"
+    ) {
+
+      showNotificationMessage(
+        "لم يتم السماح بإشعارات الطلبات. يمكنك السماح بها من إعدادات المتصفح.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    // --------------------------------------
+    // الحصول على مفتاح VAPID العام
+    // --------------------------------------
+
+    const keyResponse =
+      await fetch(
+        "/api/push/public-key"
+      );
+
+
+    const keyData =
+      await keyResponse.json();
+
+
+    if (
+      !keyResponse.ok ||
+      !keyData.success ||
+      !keyData.publicKey
+    ) {
+
+      throw new Error(
+        "تعذر الحصول على مفتاح الإشعارات"
+      );
+
+    }
+
+
+    // --------------------------------------
+    // التحقق من وجود اشتراك سابق
+    // --------------------------------------
+
+    let subscription =
+      await registration.pushManager.getSubscription();
+
+
+    // --------------------------------------
+    // إنشاء اشتراك جديد
+    // --------------------------------------
+
+    if (!subscription) {
+
+      subscription =
+        await registration.pushManager.subscribe({
+
+          userVisibleOnly:
+            true,
+
+          applicationServerKey:
+            urlBase64ToUint8Array(
+              keyData.publicKey
+            )
+
+        });
+
+    }
+
+
+    // --------------------------------------
+    // حفظ الاشتراك في السيرفر
+    // --------------------------------------
+
+    const saveResponse =
+      await fetch(
+        "/api/push/subscribe",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+
+            phone,
+
+            subscription
+
+          })
+
+        }
+      );
+
+
+    const saveData =
+      await saveResponse.json();
+
+
+    if (
+      !saveResponse.ok ||
+      !saveData.success
+    ) {
+
+      throw new Error(
+        saveData.message ||
+        "تعذر حفظ اشتراك الإشعارات"
+      );
+
+    }
+
+
+    // --------------------------------------
+    // نجاح
+    // --------------------------------------
+
+    showNotificationMessage(
+      "✅ تم تفعيل إشعارات طلباتك بنجاح.",
+      "success"
+    );
+
+
+    enableNotificationsButton.textContent =
+      "✅ إشعارات الطلب مفعّلة";
+
+
+    enableNotificationsButton.disabled =
+      true;
+
+
+  } catch (error) {
+
+    console.error(
+      "Enable notifications error:",
+      error
+    );
+
+
+    showNotificationMessage(
+      "تعذر تفعيل الإشعارات. حاول مرة أخرى.",
+      "error"
+    );
+
+  }
+
+}
+
+
+// ==========================================
+// زر تفعيل الإشعارات
+// ==========================================
+
+if (
+  enableNotificationsButton
+) {
+
+  enableNotificationsButton.addEventListener(
+    "click",
+    enableOrderNotifications
+  );
+
+}
