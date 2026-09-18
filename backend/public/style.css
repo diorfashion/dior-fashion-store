@@ -689,5 +689,28 @@ footer p {
   font-size: 16px;
   cursor: pointer;
 }
+.track-orders-button {
+  display: inline-block;
+  padding: 12px 20px;
+  border-radius: 12px;
+  background: #111;
+  color: white;
+  text-decoration: none;
+  font-family: inherit;
+  font-weight: bold;
+  transition: .2s;
+}
 
+.track-orders-button:hover {
+  opacity: .85;
+}
+
+@media (max-width: 600px) {
+  .track-orders-button {
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+  }
+}
+  
 }
