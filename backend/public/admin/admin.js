@@ -62,7 +62,8 @@ if (loginForm) {
 
 if (
   window.location.pathname === "/admin" ||
-  window.location.pathname === "/admin/"
+  window.location.pathname === "/admin/" ||
+  window.location.pathname === "/admin/index.html"
 ) {
   checkAdmin();
 }
