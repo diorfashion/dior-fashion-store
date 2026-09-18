@@ -282,6 +282,11 @@ function openProductForm() {
   document.getElementById(
     "isAvailable"
   ).checked = true;
+  document.getElementById(
+  "sizesInputs"
+).innerHTML = "";
+
+addSizeInput();
 
   document.getElementById(
     "productModal"
@@ -302,6 +307,41 @@ function closeProductForm() {
 // ==========================
 // إضافة رابط صورة
 // ==========================
+function addSizeInput(name = "", quantity = 0) {
+  const container =
+    document.getElementById("sizesInputs");
+
+  const row =
+    document.createElement("div");
+
+  row.className = "size-input-row";
+
+  row.innerHTML = `
+    <input
+      class="size-name"
+      placeholder="المقاس مثل S أو M أو 38"
+      value="${escapeHtml(name)}"
+    >
+
+    <input
+      class="size-quantity"
+      type="number"
+      min="0"
+      placeholder="الكمية"
+      value="${quantity}"
+    >
+
+    <button
+      type="button"
+      class="remove-image"
+      onclick="this.parentElement.remove()"
+    >
+      ✕
+    </button>
+  `;
+
+  container.appendChild(row);
+}
 
 function addImageInput(value = "") {
 
@@ -392,7 +432,28 @@ async function saveProduct(event) {
     return;
   }
 
+const sizes = [
+  ...document.querySelectorAll(".size-input-row")
+]
+  .map(row => {
+    const name =
+      row.querySelector(".size-name")
+        .value
+        .trim();
 
+    const quantity =
+      Number(
+        row.querySelector(".size-quantity")
+          .value
+      );
+
+    return {
+      name,
+      quantity
+    };
+  })
+  .filter(size => size.name);
+  
   const product = {
 
     name:
@@ -436,6 +497,7 @@ async function saveProduct(event) {
       ),
 
     images,
+    sizes,
 
     isAvailable:
       document.getElementById(
@@ -560,6 +622,21 @@ function editProduct(id) {
     "stock"
   ).value =
     product.stock || 0;
+  const sizesContainer =
+  document.getElementById("sizesInputs");
+
+sizesContainer.innerHTML = "";
+
+if (product.sizes && product.sizes.length) {
+  product.sizes.forEach(size => {
+    addSizeInput(
+      size.name,
+      size.quantity
+    );
+  });
+} else {
+  addSizeInput();
+}
 
 
   document.getElementById(
