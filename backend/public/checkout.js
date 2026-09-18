@@ -346,16 +346,7 @@ function renderCheckout() {
     لم يتم تحديد موقع بعد
   </div>
 
-</div>
-
-            <div
-              id="locationText"
-              class="location-text"
-            >
-              لم يتم تحديد موقع
-            </div>
-
-          </div>
+           
 
 
           <label>
@@ -499,13 +490,10 @@ function renderCheckout() {
       "submit",
       submitOrder
     );
-}
-setTimeout(
-  () => {
-    initMap();
-  },
-  100
-);
+  setTimeout(() => {
+  initMap();
+}, 100);
+
 
 
 // تحديد الموقع
