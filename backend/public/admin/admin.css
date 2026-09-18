@@ -535,5 +535,32 @@ select:focus {
   .primary-button {
     padding: 10px;
   }
+  .size-input-row {
+  display: grid;
+  grid-template-columns: 1fr 120px 45px;
+  gap: 8px;
+  margin-bottom: 10px;
+  align-items: center;
+}
+
+.size-input-row input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.remove-image {
+  border: none;
+  background: #eee;
+  color: #c00;
+  cursor: pointer;
+  border-radius: 8px;
+  height: 42px;
+}
+
+@media (max-width: 600px) {
+  .size-input-row {
+    grid-template-columns: 1fr 90px 40px;
+  }
+}
 
 }
