@@ -9,7 +9,7 @@
     content="width=device-width, initial-scale=1.0"
   >
 
-  <title>تتبع الطلب | ديور للأزياء</title>
+  <title>طلباتي | ديور للأزياء</title>
 
   <link
     rel="stylesheet"
@@ -74,90 +74,105 @@
     .track-message {
       text-align: center;
       margin-top: 15px;
-      color: crimson;
       font-weight: bold;
     }
 
-    .order-header {
-      text-align: center;
-      border-bottom: 1px solid #eee;
-      padding-bottom: 20px;
+    .orders-title {
+      margin-top: 0;
       margin-bottom: 20px;
     }
 
+    .order-card {
+      border: 1px solid #eee;
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 20px;
+      background: #fff;
+    }
+
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 15px;
+      margin-bottom: 15px;
+    }
+
     .order-number {
-      font-size: 23px;
+      font-size: 20px;
       font-weight: bold;
-      margin: 10px 0;
     }
 
     .order-date {
       color: #777;
-      font-size: 14px;
+      font-size: 13px;
+      margin-top: 5px;
     }
 
-    /* =========================
-       مراحل الطلب
-    ========================= */
+    .status-badge {
+      background: #111;
+      color: white;
+      border-radius: 20px;
+      padding: 8px 13px;
+      font-size: 14px;
+      font-weight: bold;
+    }
 
     .status-timeline {
-      margin: 25px 0;
+      margin: 20px 0;
+      padding: 15px;
+      background: #f8f8f8;
+      border-radius: 12px;
     }
 
     .status-step {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 13px 0;
+      gap: 10px;
+      padding: 8px 0;
       color: #999;
     }
 
     .status-icon {
-      width: 34px;
-      height: 34px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
-      background: #eee;
+      background: #e5e5e5;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      font-size: 15px;
+      font-size: 13px;
     }
 
-    .status-step.completed {
-      color: #111;
-      font-weight: bold;
-    }
-
-    .status-step.completed .status-icon {
-      background: #111;
-      color: white;
-    }
-
+    .status-step.completed,
     .status-step.current {
       color: #111;
       font-weight: bold;
     }
 
+    .status-step.completed .status-icon,
     .status-step.current .status-icon {
       background: #111;
       color: white;
-      box-shadow: 0 0 0 5px #eee;
     }
 
-    /* =========================
-       المنتجات
-    ========================= */
+    .status-step.current .status-icon {
+      box-shadow: 0 0 0 4px #ddd;
+    }
 
     .products-title {
-      margin-top: 0;
+      margin-top: 20px;
     }
 
     .order-product {
       display: flex;
-      gap: 15px;
+      gap: 12px;
       align-items: center;
-      padding: 15px 0;
+      padding: 12px 0;
       border-bottom: 1px solid #eee;
     }
 
@@ -166,10 +181,10 @@
     }
 
     .order-product img {
-      width: 80px;
-      height: 80px;
+      width: 70px;
+      height: 70px;
       object-fit: cover;
-      border-radius: 12px;
+      border-radius: 10px;
       background: #f5f5f5;
     }
 
@@ -179,51 +194,46 @@
 
     .product-name {
       font-weight: bold;
-      margin-bottom: 7px;
+      margin-bottom: 5px;
     }
 
     .product-detail {
       color: #666;
       font-size: 14px;
-      margin: 4px 0;
+      margin: 3px 0;
     }
 
-    /* =========================
-       ملخص المبلغ
-    ========================= */
+    .summary {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #eee;
+    }
 
     .summary-row {
       display: flex;
       justify-content: space-between;
-      padding: 10px 0;
+      padding: 7px 0;
     }
 
     .summary-total {
       border-top: 1px solid #ddd;
-      margin-top: 10px;
-      padding-top: 15px;
-      font-size: 21px;
+      margin-top: 8px;
+      padding-top: 12px;
+      font-size: 20px;
       font-weight: bold;
     }
 
     .payment-info {
       background: #f7f7f7;
-      border-radius: 12px;
-      padding: 15px;
-      margin-top: 20px;
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 15px;
     }
 
-    .back-button {
-      display: block;
-      width: 100%;
-      box-sizing: border-box;
+    .empty-orders {
       text-align: center;
-      text-decoration: none;
-      padding: 14px;
-      border-radius: 12px;
-      background: #eee;
-      color: #111;
-      margin-top: 15px;
+      padding: 30px 10px;
+      color: #666;
     }
 
     .hidden {
@@ -241,13 +251,17 @@
         padding: 18px;
       }
 
-      .order-product img {
-        width: 65px;
-        height: 65px;
+      .order-card {
+        padding: 14px;
       }
 
       .order-number {
-        font-size: 19px;
+        font-size: 18px;
+      }
+
+      .order-product img {
+        width: 60px;
+        height: 60px;
       }
 
     }
@@ -256,17 +270,16 @@
 
 </head>
 
-
 <body>
 
   <main class="track-page">
 
     <h1 class="track-title">
-      🔎 تتبع طلبك
+      🛍️ طلباتي
     </h1>
 
 
-    <!-- نموذج البحث -->
+    <!-- البحث برقم الهاتف -->
 
     <section class="track-card">
 
@@ -274,18 +287,6 @@
         id="trackForm"
         class="track-form"
       >
-
-        <label>
-          رقم الطلب
-        </label>
-
-        <input
-          id="orderNumber"
-          required
-          placeholder="مثال: DF-1234567890-123"
-          autocomplete="off"
-        >
-
 
         <label>
           رقم الهاتف
@@ -299,15 +300,13 @@
           autocomplete="tel"
         >
 
-
         <button
           type="submit"
           class="track-button"
           id="trackButton"
         >
-          🔎 البحث عن الطلب
+          🔎 عرض طلباتي
         </button>
-
 
         <div
           id="trackMessage"
@@ -319,12 +318,24 @@
     </section>
 
 
-    <!-- نتيجة الطلب -->
+    <!-- جميع الطلبات -->
 
     <section
-      id="orderResult"
+      id="ordersResult"
       class="hidden"
-    ></section>
+    >
+
+      <div class="track-card">
+
+        <h2 class="orders-title">
+          📦 طلباتك
+        </h2>
+
+        <div id="ordersList"></div>
+
+      </div>
+
+    </section>
 
   </main>
 
