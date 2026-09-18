@@ -127,13 +127,15 @@ async function enableAdminNotifications() {
     // =====================================
 
     const registration =
-      await navigator.serviceWorker.register(
-        "/service-worker.js"
-      );
+  await navigator.serviceWorker.register(
+    "/service-worker.js",
+    {
+      scope: "/"
+    }
+  );
 
-
-    await navigator.serviceWorker.ready;
-
+await registration.update();
+await navigator.serviceWorker.ready;
 
     // =====================================
     // طلب إذن الإشعارات
