@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>تتبع الطلب | ديور للأزياء</title>
+
+  <link
+    rel="stylesheet"
+    href="style.css"
+  >
+
+  <style>
+
+    .track-page {
+      max-width: 850px;
+      margin: 30px auto;
+      padding: 20px;
+    }
+
+    .track-title {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .track-card {
+      background: white;
+      border-radius: 16px;
+      padding: 25px;
+      box-shadow: 0 4px 18px rgba(0,0,0,.06);
+      margin-bottom: 20px;
+    }
+
+    .track-form label {
+      display: block;
+      margin: 15px 0 7px;
+      font-weight: bold;
+    }
+
+    .track-form input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 14px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 16px;
+    }
+
+    .track-button {
+      width: 100%;
+      border: none;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 12px;
+      background: #111;
+      color: white;
+      font-family: inherit;
+      font-size: 17px;
+      cursor: pointer;
+    }
+
+    .track-button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    .track-message {
+      text-align: center;
+      margin-top: 15px;
+      color: crimson;
+      font-weight: bold;
+    }
+
+    .order-header {
+      text-align: center;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 20px;
+      margin-bottom: 20px;
+    }
+
+    .order-number {
+      font-size: 23px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+
+    .order-date {
+      color: #777;
+      font-size: 14px;
+    }
+
+    /* =========================
+       مراحل الطلب
+    ========================= */
+
+    .status-timeline {
+      margin: 25px 0;
+    }
+
+    .status-step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 0;
+      color: #999;
+    }
+
+    .status-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 15px;
+    }
+
+    .status-step.completed {
+      color: #111;
+      font-weight: bold;
+    }
+
+    .status-step.completed .status-icon {
+      background: #111;
+      color: white;
+    }
+
+    .status-step.current {
+      color: #111;
+      font-weight: bold;
+    }
+
+    .status-step.current .status-icon {
+      background: #111;
+      color: white;
+      box-shadow: 0 0 0 5px #eee;
+    }
+
+    /* =========================
+       المنتجات
+    ========================= */
+
+    .products-title {
+      margin-top: 0;
+    }
+
+    .order-product {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      padding: 15px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .order-product:last-child {
+      border-bottom: none;
+    }
+
+    .order-product img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 12px;
+      background: #f5f5f5;
+    }
+
+    .product-info {
+      flex: 1;
+    }
+
+    .product-name {
+      font-weight: bold;
+      margin-bottom: 7px;
+    }
+
+    .product-detail {
+      color: #666;
+      font-size: 14px;
+      margin: 4px 0;
+    }
+
+    /* =========================
+       ملخص المبلغ
+    ========================= */
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+    }
+
+    .summary-total {
+      border-top: 1px solid #ddd;
+      margin-top: 10px;
+      padding-top: 15px;
+      font-size: 21px;
+      font-weight: bold;
+    }
+
+    .payment-info {
+      background: #f7f7f7;
+      border-radius: 12px;
+      padding: 15px;
+      margin-top: 20px;
+    }
+
+    .back-button {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+      text-align: center;
+      text-decoration: none;
+      padding: 14px;
+      border-radius: 12px;
+      background: #eee;
+      color: #111;
+      margin-top: 15px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @media (max-width: 600px) {
+
+      .track-page {
+        margin: 10px auto;
+        padding: 12px;
+      }
+
+      .track-card {
+        padding: 18px;
+      }
+
+      .order-product img {
+        width: 65px;
+        height: 65px;
+      }
+
+      .order-number {
+        font-size: 19px;
+      }
+
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+  <main class="track-page">
+
+    <h1 class="track-title">
+      🔎 تتبع طلبك
+    </h1>
+
+
+    <!-- نموذج البحث -->
+
+    <section class="track-card">
+
+      <form
+        id="trackForm"
+        class="track-form"
+      >
+
+        <label>
+          رقم الطلب
+        </label>
+
+        <input
+          id="orderNumber"
+          required
+          placeholder="مثال: DF-1234567890-123"
+          autocomplete="off"
+        >
+
+
+        <label>
+          رقم الهاتف
+        </label>
+
+        <input
+          id="customerPhone"
+          type="tel"
+          required
+          placeholder="مثال: 777000000"
+          autocomplete="tel"
+        >
+
+
+        <button
+          type="submit"
+          class="track-button"
+          id="trackButton"
+        >
+          🔎 البحث عن الطلب
+        </button>
+
+
+        <div
+          id="trackMessage"
+          class="track-message"
+        ></div>
+
+      </form>
+
+    </section>
+
+
+    <!-- نتيجة الطلب -->
+
+    <section
+      id="orderResult"
+      class="hidden"
+    ></section>
+
+  </main>
+
+
+  <script src="track-order.js"></script>
+
+</body>
+
+</html>
