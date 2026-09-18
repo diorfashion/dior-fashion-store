@@ -122,234 +122,209 @@ form.addEventListener(
 
 
 function renderOrder(order) {
+  const isDelivered = order.status === "تم التوصيل";
 
-  const statusIndex =
-    ORDER_STATUSES.indexOf(
-      order.status
-    );
+  const orderNumber = order.orderNumber || order._id || "";
+  const customerName = order.customer?.name || order.customerName || "";
 
+  const orderDate = order.createdAt
+    ? new Date(order.createdAt).toLocaleString("ar-YE", {
+        dateStyle: "medium",
+        timeStyle: "short"
+      })
+    : "";
 
-  const timeline =
-    ORDER_STATUSES
-      .map((status, index) => {
+  const itemsHtml = (order.items || [])
+    .map(item => {
+      const image = item.image || "/images/logo.jpg";
 
-        let className = "";
+      return `
+        <div class="track-product-item">
+          <img
+            src="${escapeHtml(image)}"
+            alt=""
+            onerror="this.onerror=null;this.src='/images/logo.jpg';"
+          >
 
-        if (index < statusIndex) {
-          className = "completed";
-        }
-
-        if (index === statusIndex) {
-          className = "current";
-        }
-
-        return `
-          <div class="status-step ${className}">
-
-            <div class="status-icon">
-              ${
-                index <= statusIndex
-                  ? "✓"
-                  : index + 1
-              }
-            </div>
+          <div>
+            <strong>
+              ${escapeHtml(item.name || "منتج")}
+            </strong>
 
             <span>
-              ${escapeHtml(status)}
+              المقاس:
+              ${escapeHtml(item.size || "بدون مقاس")}
             </span>
 
+            <span>
+              الكمية:
+              ${item.quantity || 1}
+            </span>
+
+            <span>
+              السعر:
+              ${formatMoney(item.price)} ريال
+            </span>
           </div>
-        `;
+        </div>
+      `;
+    })
+    .join("");
 
-      })
-      .join("");
+  /*
+   * إذا كان الطلب تم توصيله
+   */
+  if (isDelivered) {
+    return `
+      <div
+        class="customer-delivered-order"
+        onclick="toggleCustomerDeliveredOrder('${escapeJs(String(order._id))}')"
+      >
 
+        <div class="delivered-order-check">
+          ✓
+        </div>
 
-  const products =
-    (order.items || [])
-      .map(item => {
+        <div class="delivered-order-summary">
 
-        return `
-          <div class="order-product">
+          <div>
+            <strong>
+              طلب ${escapeHtml(orderNumber)}
+            </strong>
+
+            <span>
+              ${escapeHtml(customerName)}
+            </span>
 
             ${
-              item.image
+              orderDate
                 ? `
-                <img
-  src="${escapeHtml(item.image)}"
-  alt="${escapeHtml(item.name || "منتج")}"
-  class="order-product-image"
-  onerror="this.onerror=null; this.src='images/logo.jpg';"
->
+                  <small>
+                    ${escapeHtml(orderDate)}
+                  </small>
                 `
-                : `
-                  <div
-                    style="
-                      width:70px;
-                      height:70px;
-                      border-radius:10px;
-                      background:#eee;
-                    "
-                  ></div>
+                : ""
+            }
+          </div>
+
+          <div class="delivered-status">
+            تم التوصيل ✓
+          </div>
+
+        </div>
+
+        <div
+          id="customer-delivered-details-${escapeHtml(String(order._id))}"
+          class="customer-delivered-details"
+        >
+
+          <div class="track-order-details">
+
+            <p>
+              <strong>حالة الطلب:</strong>
+              تم التوصيل ✓
+            </p>
+
+            ${
+              order.paymentMethod
+                ? `
+                  <p>
+                    <strong>طريقة الدفع:</strong>
+                    ${escapeHtml(order.paymentMethod)}
+                  </p>
                 `
+                : ""
             }
 
-            <div class="product-info">
-
-              <div class="product-name">
-                ${escapeHtml(
-                  item.name || "منتج"
-                )}
-              </div>
-
-              <div class="product-detail">
-                المقاس:
-                ${escapeHtml(
-                  item.size ||
-                  "بدون مقاس"
-                )}
-              </div>
-
-              <div class="product-detail">
-                الكمية:
-                ${item.quantity || 1}
-              </div>
-
-              <div class="product-detail">
-                السعر:
-                ${formatMoney(item.price)}
-                ريال
-              </div>
-
-            </div>
+            ${
+              order.deliveryAddress
+                ? `
+                  <p>
+                    <strong>العنوان:</strong>
+                    ${escapeHtml(order.deliveryAddress)}
+                  </p>
+                `
+                : ""
+            }
 
           </div>
-        `;
 
-      })
-      .join("");
+          <div class="track-products">
+            ${itemsHtml}
+          </div>
 
+          <div class="track-total">
+            الإجمالي:
+            ${formatMoney(order.total || 0)}
+            ريال
+          </div>
 
-  const createdAt =
-    order.createdAt
-      ? new Date(
-          order.createdAt
-        ).toLocaleString("ar-YE")
-      : "";
+        </div>
 
+      </div>
+    `;
+  }
 
+  /*
+   * الطلبات التي لم يتم توصيلها
+   */
   return `
-    <article class="order-card">
+    <div class="customer-order-card">
 
-      <div class="order-header">
+      <div class="customer-order-header">
 
         <div>
+          <strong>
+            طلب ${escapeHtml(orderNumber)}
+          </strong>
 
-          <div class="order-number">
-            طلب رقم:
-            ${escapeHtml(
-              order.orderNumber
-            )}
-          </div>
-
-          <div class="order-date">
-            ${escapeHtml(createdAt)}
-          </div>
-
+          ${
+            orderDate
+              ? `
+                <small>
+                  ${escapeHtml(orderDate)}
+                </small>
+              `
+              : ""
+          }
         </div>
 
-        <div class="status-badge">
-          ${escapeHtml(
-            order.status
-          )}
-        </div>
+        <span class="customer-order-status">
+          ${escapeHtml(order.status || "تم الطلب")}
+        </span>
 
       </div>
 
-
-      <div class="status-timeline">
-
-        ${timeline}
-
+      <div class="track-products">
+        ${itemsHtml}
       </div>
 
-
-      <h3 class="products-title">
-        🛍️ المنتجات
-      </h3>
-
-
-      <div>
-        ${products}
+      <div class="track-total">
+        الإجمالي:
+        ${formatMoney(order.total || 0)}
+        ريال
       </div>
 
-
-      <div class="payment-info">
-
-        <strong>
-          طريقة الدفع:
-        </strong>
-
-        ${escapeHtml(
-          order.paymentMethod || ""
-        )}
-
-      </div>
-
-
-      <div class="summary">
-
-        <div class="summary-row">
-
-          <span>
-            المجموع الفرعي
-          </span>
-
-          <span>
-            ${formatMoney(
-              order.subtotal
-            )}
-            ريال
-          </span>
-
-        </div>
-
-
-        <div class="summary-row">
-
-          <span>
-            رسوم التوصيل
-          </span>
-
-          <span>
-            ${formatMoney(
-              order.deliveryFee
-            )}
-            ريال
-          </span>
-
-        </div>
-
-
-        <div class="summary-row summary-total">
-
-          <span>
-            الإجمالي
-          </span>
-
-          <span>
-            ${formatMoney(
-              order.total
-            )}
-            ريال
-          </span>
-
-        </div>
-
-      </div>
-
-    </article>
+    </div>
   `;
+}
+
+
+/*
+ * فتح وإغلاق تفاصيل الطلب الذي تم توصيله
+ */
+function toggleCustomerDeliveredOrder(orderId) {
+  const details = document.getElementById(
+    `customer-delivered-details-${orderId}`
+  );
+
+  if (!details) return;
+
+  if (details.style.display === "block") {
+    details.style.display = "none";
+  } else {
+    details.style.display = "block";
+  }
 }
 
 
