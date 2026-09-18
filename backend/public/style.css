@@ -60,6 +60,14 @@ button {
 
   position: relative;
 }
+.notification-message.success {
+  color: #198754;
+}
+
+
+.notification-message.error {
+  color: #c62828;
+}
 
 .cart-button span {
   position: absolute;
