@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="ar" dir="rtl">
 
 <head>
@@ -22,210 +21,388 @@
 
 <body>
 
+  <!-- =====================================
+       الشريط العلوي
+  ====================================== -->
+
   <header class="admin-header">
 
     <div class="admin-brand">
 
-      <img
-        src="../images/logo.jpg"
-        alt="ديور للأزياء"
-      >
+      <div class="brand-logo">
 
-      <div>
+        <img
+          src="../images/logo.jpg"
+          alt="ديور للأزياء"
+        >
+
+      </div>
+
+      <div class="brand-info">
+
         <strong>
           ديور للأزياء
         </strong>
 
-        <small>
-          لوحة الإدارة
-        </small>
+        <span>
+          لوحة التحكم
+        </span>
+
       </div>
 
     </div>
 
-    <button
-      onclick="logout()"
-      class="logout-button"
-    >
-      تسجيل الخروج
-    </button>
+
+    <div class="header-actions">
+
+      <a
+        href="/"
+        class="view-store-button"
+      >
+        🛍️ المتجر
+      </a>
+
+      <button
+        onclick="logout()"
+        class="logout-button"
+      >
+        <span>↪</span>
+        تسجيل الخروج
+      </button>
+
+    </div>
 
   </header>
 
 
+  <!-- =====================================
+       المحتوى الرئيسي
+  ====================================== -->
+
   <main class="admin-container">
 
 
-  <section class="stats">
+    <!-- ===================================
+         الترحيب
+    ==================================== -->
 
-  <div class="stat-card">
+    <section class="dashboard-welcome">
 
-    <span>
-      📦
-    </span>
+      <div>
 
-    <div>
+        <span class="welcome-label">
+          مرحبًا بك 👋
+        </span>
 
-      <small>
-        المنتجات
-      </small>
+        <h1>
+          لوحة إدارة ديور للأزياء
+        </h1>
 
-      <strong id="productCount">
-        0
-      </strong>
+        <p>
+          إدارة المنتجات والطلبات والمتجر من مكان واحد.
+        </p>
 
-    </div>
+      </div>
 
-  </div>
-
-
-  <div
-    class="stat-card"
-    onclick="window.location.href='/admin/orders.html'"
-    style="cursor:pointer;"
-  >
-
-    <span>
-      🛒
-    </span>
-
-    <div>
-
-      <small>
-        الطلبات
-      </small>
-
-      <strong id="orderCount">
-        0
-      </strong>
-
-    </div>
-
-  </div>
-
-</section>
-
-
-    <section class="admin-section">
-
-   <div class="section-header">
-
-  <h1>
-    المنتجات
-  </h1>
-
-  <div style="display:flex; gap:10px; flex-wrap:wrap;">
-
-    <a
-      href="/admin/orders.html"
-      class="primary-button"
-      style="text-decoration:none;"
-    >
-      📦 الطلبات
-    </a>
-
-    <button
-      class="primary-button"
-      onclick="openProductForm()"
-    >
-      + إضافة منتج
-    </button>
-
-  </div>
-
-</div>
-
-      <div
-        id="productsGrid"
-        class="admin-products"
-      ></div>
+      <div class="welcome-icon">
+        ✨
+      </div>
 
     </section>
 
 
-  </main>
+    <!-- ===================================
+         الإحصائيات
+    ==================================== -->
+
+    <section class="stats-grid">
 
 
-  <!-- نافذة إضافة / تعديل المنتج -->
+      <!-- المنتجات -->
 
-  <div
-    id="productModal"
-    class="modal"
-  >
+      <div class="stat-card">
 
-    <div class="modal-card">
+        <div class="stat-icon products-icon">
+          👗
+        </div>
 
-      <div class="modal-header">
+        <div class="stat-content">
 
-        <h2 id="formTitle">
-          إضافة منتج
-        </h2>
+          <span>
+            إجمالي المنتجات
+          </span>
+
+          <strong id="productCount">
+            0
+          </strong>
+
+        </div>
+
+        <div class="stat-arrow">
+          ←
+        </div>
+
+      </div>
+
+
+      <!-- الطلبات -->
+
+      <div
+        class="stat-card clickable"
+        onclick="window.location.href='/admin/orders.html'"
+      >
+
+        <div class="stat-icon orders-icon">
+          📦
+        </div>
+
+        <div class="stat-content">
+
+          <span>
+            إجمالي الطلبات
+          </span>
+
+          <strong id="orderCount">
+            0
+          </strong>
+
+        </div>
+
+        <div class="stat-arrow">
+          ←
+        </div>
+
+      </div>
+
+
+      <!-- حالة المتجر -->
+
+      <div class="stat-card">
+
+        <div class="stat-icon store-icon">
+          🏪
+        </div>
+
+        <div class="stat-content">
+
+          <span>
+            حالة المتجر
+          </span>
+
+          <strong class="store-status">
+            متاح
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- الإدارة -->
+
+      <div class="stat-card">
+
+        <div class="stat-icon admin-icon">
+          ⚙️
+        </div>
+
+        <div class="stat-content">
+
+          <span>
+            لوحة الإدارة
+          </span>
+
+          <strong class="store-status">
+            نشطة
+          </strong>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================
+         الإجراءات السريعة
+    ==================================== -->
+
+    <section class="quick-actions">
+
+      <div class="section-title">
+
+        <div>
+
+          <span>
+            الوصول السريع
+          </span>
+
+          <h2>
+            ماذا تريد أن تفعل؟
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <div class="quick-actions-grid">
+
 
         <button
-          onclick="closeProductForm()"
+          class="quick-action-card primary-action"
+          onclick="openProductForm()"
         >
-          ✕
+
+          <div class="quick-action-icon">
+            ＋
+          </div>
+
+          <div>
+
+            <strong>
+              إضافة منتج
+            </strong>
+
+            <span>
+              أضف منتجًا جديدًا للمتجر
+            </span>
+
+          </div>
+
+          <b>
+            ←
+          </b>
+
+        </button>
+
+
+        <a
+          href="/admin/orders.html"
+          class="quick-action-card"
+        >
+
+          <div class="quick-action-icon">
+            📦
+          </div>
+
+          <div>
+
+            <strong>
+              إدارة الطلبات
+            </strong>
+
+            <span>
+              عرض ومتابعة طلبات العملاء
+            </span>
+
+          </div>
+
+          <b>
+            ←
+          </b>
+
+        </a>
+
+
+        <a
+          href="/"
+          class="quick-action-card"
+        >
+
+          <div class="quick-action-icon">
+            🛍️
+          </div>
+
+          <div>
+
+            <strong>
+              مشاهدة المتجر
+            </strong>
+
+            <span>
+              افتح واجهة المتجر كعميل
+            </span>
+
+          </div>
+
+          <b>
+            ←
+          </b>
+
+        </a>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================
+         المنتجات
+    ==================================== -->
+
+    <section class="admin-section">
+
+
+      <div class="products-section-header">
+
+
+        <div class="section-title">
+
+          <span>
+            إدارة المتجر
+          </span>
+
+          <h2>
+            المنتجات
+          </h2>
+
+        </div>
+
+
+        <button
+          class="primary-button"
+          onclick="openProductForm()"
+        >
+
+          <span>
+            ＋
+          </span>
+
+          إضافة منتج
+
         </button>
 
       </div>
 
 
-      <form id="productForm">
+      <!-- البحث والفلترة -->
+
+      <div class="products-toolbar">
 
 
-        <input
-          type="hidden"
-          id="productId"
-        >
+        <div class="search-box">
 
+          <span>
+            🔍
+          </span>
 
-        <label>
-          اسم المنتج
-        </label>
+          <input
+            type="search"
+            id="productSearch"
+            placeholder="ابحث عن منتج..."
+          >
 
-        <input
-          id="name"
-          required
-          placeholder="مثال: فستان نسائي"
-        >
+        </div>
 
-
-        <label>
-          السعر
-        </label>
-
-        <input
-          id="price"
-          type="number"
-          min="0"
-          required
-          placeholder="35000"
-        >
-
-
-        <label>
-          السعر قبل الخصم
-        </label>
-
-        <input
-          id="oldPrice"
-          type="number"
-          min="0"
-          placeholder="45000"
-        >
-
-
-        <label>
-          التصنيف
-        </label>
 
         <select
-          id="category"
-          required
+          id="categoryFilter"
+          class="filter-select"
         >
 
           <option value="">
-            اختر التصنيف
+            كل التصنيفات
           </option>
 
           <option>
@@ -267,67 +444,305 @@
         </select>
 
 
-        <label>
-          الوصف
-        </label>
-
-        <textarea
-          id="description"
-          rows="4"
-          placeholder="تفاصيل المنتج..."
-        ></textarea>
+      </div>
 
 
-      <label>المخزون العام</label>
-<input
-  id="stock"
-  type="number"
-  min="0"
-  value="0"
->
+      <!-- المنتجات -->
 
-<label>المقاسات والكميات</label>
-
-<div id="sizesInputs"></div>
-
-<button
-  type="button"
-  class="add-image-button"
-  onclick="addSizeInput()"
->
-  + إضافة مقاس
-</button>
+      <div
+        id="productsGrid"
+        class="admin-products"
+      ></div>
 
 
-        <label>
-          صور المنتج
-        </label>
+      <!-- حالة عدم وجود منتجات -->
 
-        <div id="imageInputs">
+      <div
+        id="emptyProducts"
+        class="empty-products"
+        style="display:none;"
+      >
 
-          <div class="image-input-row">
+        <div>
+          📦
+        </div>
 
-            <input
-              class="image-url"
-              placeholder="https://example.com/image.jpg"
-              required
-            >
+        <h3>
+          لا توجد منتجات
+        </h3>
 
-          </div>
+        <p>
+          لم يتم العثور على منتجات مطابقة.
+        </p>
+
+      </div>
+
+
+    </section>
+
+
+  </main>
+
+
+  <!-- =====================================
+       نافذة المنتج
+  ====================================== -->
+
+  <div
+    id="productModal"
+    class="modal"
+  >
+
+    <div class="modal-overlay"
+         onclick="closeProductForm()">
+    </div>
+
+
+    <div class="modal-card">
+
+
+      <!-- رأس النافذة -->
+
+      <div class="modal-header">
+
+        <div>
+
+          <span>
+            إدارة المنتج
+          </span>
+
+          <h2 id="formTitle">
+            إضافة منتج
+          </h2>
 
         </div>
 
 
         <button
           type="button"
-          class="add-image-button"
-          onclick="addImageInput()"
+          class="modal-close"
+          onclick="closeProductForm()"
         >
-          + إضافة رابط صورة
+          ✕
         </button>
 
+      </div>
 
-        <label class="checkbox-label">
+
+      <!-- النموذج -->
+
+      <form id="productForm">
+
+
+        <input
+          type="hidden"
+          id="productId"
+        >
+
+
+        <!-- معلومات أساسية -->
+
+        <div class="form-section">
+
+          <div class="form-section-title">
+            المعلومات الأساسية
+          </div>
+
+
+          <label>
+            اسم المنتج
+          </label>
+
+          <input
+            id="name"
+            required
+            placeholder="مثال: فستان نسائي أنيق"
+          >
+
+
+          <div class="form-row">
+
+            <div>
+
+              <label>
+                السعر
+              </label>
+
+              <input
+                id="price"
+                type="number"
+                min="0"
+                required
+                placeholder="35000"
+              >
+
+            </div>
+
+
+            <div>
+
+              <label>
+                السعر قبل الخصم
+              </label>
+
+              <input
+                id="oldPrice"
+                type="number"
+                min="0"
+                placeholder="45000"
+              >
+
+            </div>
+
+          </div>
+
+
+          <label>
+            التصنيف
+          </label>
+
+          <select
+            id="category"
+            required
+          >
+
+            <option value="">
+              اختر التصنيف
+            </option>
+
+            <option>
+              فساتين نسائية
+            </option>
+
+            <option>
+              بدلات أطفال ولادي
+            </option>
+
+            <option>
+              بدلات أطفال بناتي
+            </option>
+
+            <option>
+              بجايم
+            </option>
+
+            <option>
+              ملابس نوم
+            </option>
+
+            <option>
+              طقومات نسائية
+            </option>
+
+            <option>
+              بناطيل
+            </option>
+
+            <option>
+              بلايز
+            </option>
+
+            <option>
+              تنورات
+            </option>
+
+          </select>
+
+
+          <label>
+            وصف المنتج
+          </label>
+
+          <textarea
+            id="description"
+            rows="4"
+            placeholder="اكتب تفاصيل المنتج..."
+          ></textarea>
+
+        </div>
+
+
+        <!-- المخزون -->
+
+        <div class="form-section">
+
+          <div class="form-section-title">
+            المخزون والمقاسات
+          </div>
+
+
+          <label>
+            المخزون العام
+          </label>
+
+          <input
+            id="stock"
+            type="number"
+            min="0"
+            value="0"
+          >
+
+
+          <label>
+            المقاسات والكميات
+          </label>
+
+
+          <div
+            id="sizesInputs"
+            class="sizes-container"
+          ></div>
+
+
+          <button
+            type="button"
+            class="secondary-button"
+            onclick="addSizeInput()"
+          >
+            ＋ إضافة مقاس
+          </button>
+
+        </div>
+
+
+        <!-- الصور -->
+
+        <div class="form-section">
+
+          <div class="form-section-title">
+            صور المنتج
+          </div>
+
+
+          <div id="imageInputs">
+
+            <div class="image-input-row">
+
+              <input
+                class="image-url"
+                placeholder="رابط صورة المنتج"
+                required
+              >
+
+            </div>
+
+          </div>
+
+
+          <button
+            type="button"
+            class="secondary-button"
+            onclick="addImageInput()"
+          >
+            ＋ إضافة صورة
+          </button>
+
+        </div>
+
+
+        <!-- حالة المنتج -->
+
+        <label class="availability-toggle">
 
           <input
             type="checkbox"
@@ -335,20 +750,42 @@
             checked
           >
 
-          المنتج متوفر
+          <span class="toggle-ui"></span>
+
+          <span>
+
+            <strong>
+              المنتج متوفر
+            </strong>
+
+            <small>
+              السماح للعملاء بشراء هذا المنتج
+            </small>
+
+          </span>
 
         </label>
 
+
+        <!-- الحفظ -->
 
         <button
           type="submit"
           class="save-button"
         >
-          حفظ المنتج
+
+          <span>
+            حفظ المنتج
+          </span>
+
         </button>
 
 
-        <div id="formMessage"></div>
+        <div
+          id="formMessage"
+          class="form-message"
+        ></div>
+
 
       </form>
 
@@ -356,6 +793,10 @@
 
   </div>
 
+
+  <!-- =====================================
+       JavaScript
+  ====================================== -->
 
   <script src="admin.js"></script>
 
