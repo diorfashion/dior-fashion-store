@@ -4,8 +4,202 @@ let cart =
   JSON.parse(
     localStorage.getItem("dior_cart") || "[]"
   );
+let map = null;
+let marker = null;
+
+let selectedLatitude = null;
+let selectedLongitude = null;
+
+function initMap() {
+
+  // صنعاء كنقطة بداية تقريبية للخريطة
+  const defaultLatitude = 15.3694;
+  const defaultLongitude = 44.1910;
+
+  map = L.map("map").setView(
+    [
+      defaultLatitude,
+      defaultLongitude
+    ],
+    13
+  );
 
 
+  L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+      maxZoom: 19,
+      attribution:
+        '&copy; OpenStreetMap contributors'
+    }
+  ).addTo(map);
+
+
+  // الضغط على الخريطة
+
+  map.on(
+    "click",
+    function(event) {
+
+      setDeliveryLocation(
+        event.latlng.lat,
+        event.latlng.lng
+      );
+
+    }
+  );
+}
+
+
+function setDeliveryLocation(
+  latitude,
+  longitude
+) {
+
+  selectedLatitude =
+    latitude;
+
+  selectedLongitude =
+    longitude;
+
+
+  // إنشاء العلامة أول مرة
+
+  if (!marker) {
+
+    marker =
+      L.marker(
+        [
+          latitude,
+          longitude
+        ],
+        {
+          draggable: true
+        }
+      ).addTo(map);
+
+
+    // إذا حرك العميل العلامة
+
+    marker.on(
+      "dragend",
+      function(event) {
+
+        const position =
+          event.target.getLatLng();
+
+        setDeliveryLocation(
+          position.lat,
+          position.lng
+        );
+
+      }
+    );
+
+  } else {
+
+    marker.setLatLng(
+      [
+        latitude,
+        longitude
+      ]
+    );
+
+  }
+
+
+  map.setView(
+    [
+      latitude,
+      longitude
+    ],
+    16
+  );
+
+
+  document.getElementById(
+    "locationText"
+  ).innerHTML = `
+    <strong>
+      تم تحديد موقع التوصيل 📍
+    </strong>
+    <br>
+    خط العرض:
+    ${latitude.toFixed(6)}
+    <br>
+    خط الطول:
+    ${longitude.toFixed(6)}
+  `;
+}
+
+
+// استخدام GPS الهاتف
+
+function getCurrentLocation() {
+
+  if (
+    !navigator.geolocation
+  ) {
+
+    alert(
+      "المتصفح لا يدعم تحديد الموقع"
+    );
+
+    return;
+  }
+
+
+  const locationText =
+    document.getElementById(
+      "locationText"
+    );
+
+  locationText.textContent =
+    "جاري تحديد موقعك...";
+
+
+  navigator.geolocation.getCurrentPosition(
+
+    function(position) {
+
+      const latitude =
+        position.coords.latitude;
+
+      const longitude =
+        position.coords.longitude;
+
+
+      setDeliveryLocation(
+        latitude,
+        longitude
+      );
+
+    },
+
+    function(error) {
+
+      console.error(
+        "Location error:",
+        error
+      );
+
+      alert(
+        "لم نتمكن من الحصول على موقعك. تأكد من السماح للموقع في الهاتف."
+      );
+
+      locationText.textContent =
+        "لم يتم تحديد موقع";
+    },
+
+    {
+      enableHighAccuracy: true,
+
+      timeout: 10000,
+
+      maximumAge: 0
+    }
+  );
+}
 // تشغيل الصفحة
 
 function initCheckout() {
@@ -115,24 +309,44 @@ function renderCheckout() {
           ></textarea>
 
 
-          <div class="map-box">
+        <div class="map-box">
 
-            <strong>
-              📍 موقع التوصيل
-            </strong>
+  <strong>
+    📍 حدد موقع التوصيل
+  </strong>
 
-            <p>
-              يمكنك تحديد الموقع من الخريطة
-              في المرحلة التالية.
-            </p>
+  <p>
+    اضغط على الخريطة لتحديد موقعك،
+    أو استخدم موقع الهاتف الحالي.
+  </p>
 
-            <button
-              type="button"
-              class="map-button"
-              onclick="selectLocation()"
-            >
-              📍 تحديد الموقع
-            </button>
+  <button
+    type="button"
+    class="map-button"
+    onclick="getCurrentLocation()"
+  >
+    📍 استخدام موقعي الحالي
+  </button>
+
+  <div
+    id="map"
+    style="
+      height:350px;
+      width:100%;
+      margin-top:15px;
+      border-radius:12px;
+      overflow:hidden;
+    "
+  ></div>
+
+  <div
+    id="locationText"
+    class="location-text"
+  >
+    لم يتم تحديد موقع بعد
+  </div>
+
+</div>
 
             <div
               id="locationText"
@@ -286,6 +500,12 @@ function renderCheckout() {
       submitOrder
     );
 }
+setTimeout(
+  () => {
+    initMap();
+  },
+  100
+);
 
 
 // تحديد الموقع
@@ -303,6 +523,17 @@ function selectLocation() {
 async function submitOrder(event) {
 
   event.preventDefault();
+  if (
+  selectedLatitude === null ||
+  selectedLongitude === null
+) {
+
+  alert(
+    "يرجى تحديد موقع التوصيل على الخريطة 📍"
+  );
+
+  return;
+  }
 
   const button =
     document.getElementById(
@@ -358,22 +589,28 @@ async function submitOrder(event) {
 
     delivery: {
 
-      address:
-        document
-          .getElementById(
-            "deliveryAddress"
-          )
-          .value
-          .trim(),
+  address:
+    document
+      .getElementById(
+        "deliveryAddress"
+      )
+      .value
+      .trim(),
 
-      notes:
-        document
-          .getElementById(
-            "deliveryNotes"
-          )
-          .value
-          .trim()
-    },
+  latitude:
+    selectedLatitude,
+
+  longitude:
+    selectedLongitude,
+
+  notes:
+    document
+      .getElementById(
+        "deliveryNotes"
+      )
+      .value
+      .trim()
+},
 
 
     paymentMethod:
