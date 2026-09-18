@@ -1,7 +1,8 @@
 const express = require("express");
 const webpush = require("web-push");
 const PushSubscription = require("../models/PushSubscription");
-
+const AdminPushSubscription =
+  require("../models/AdminPushSubscription");
 const router = express.Router();
 
 webpush.setVapidDetails(
@@ -22,7 +23,63 @@ router.get("/public-key", (req, res) => {
   });
 });
 
+// ==========================================
+// إرسال إشعار لجميع أجهزة الأدمن
+// ==========================================
 
+async function sendAdminNotification({
+  title,
+  body,
+  url = "/admin/orders.html"
+}) {
+
+  const subscriptions =
+    await AdminPushSubscription.find();
+
+  if (!subscriptions.length) {
+    console.log(
+      "لا توجد أجهزة أدمن مفعلة للإشعارات"
+    );
+
+    return;
+  }
+
+  const payload =
+    JSON.stringify({
+      title,
+      body,
+      url
+    });
+
+  for (const item of subscriptions) {
+
+    try {
+
+      await webpush.sendNotification(
+        item.subscription,
+        payload
+      );
+
+    } catch (error) {
+
+      console.error(
+        "Admin push notification error:",
+        error.statusCode,
+        error.message
+      );
+
+      // الاشتراك انتهى أو أصبح غير صالح
+      if (
+        error.statusCode === 404 ||
+        error.statusCode === 410
+      ) {
+        await AdminPushSubscription.deleteOne({
+          _id: item._id
+        });
+      }
+    }
+  }
+}
 // ==========================================
 // حفظ اشتراك العميل
 // ==========================================
@@ -83,6 +140,62 @@ router.post("/subscribe", async (req, res) => {
   }
 });
 
+// ==========================================
+// تسجيل اشتراك إشعارات الأدمن
+// ==========================================
+
+router.post(
+  "/admin/subscribe",
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const { subscription } = req.body;
+
+      if (
+        !subscription ||
+        !subscription.endpoint
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "اشتراك الإشعارات غير صالح"
+        });
+      }
+
+      await AdminPushSubscription.findOneAndUpdate(
+        {
+          "subscription.endpoint":
+            subscription.endpoint
+        },
+        {
+          subscription
+        },
+        {
+          upsert: true,
+          new: true,
+          setDefaultsOnInsert: true
+        }
+      );
+
+      res.json({
+        success: true,
+        message:
+          "تم تفعيل إشعارات الأدمن بنجاح"
+      });
+
+    } catch (error) {
+      console.error(
+        "Admin push subscribe error:",
+        error
+      );
+
+      res.status(500).json({
+        success: false,
+        message:
+          "تعذر حفظ اشتراك إشعارات الأدمن"
+      });
+    }
+  }
+);
 
 // ==========================================
 // إرسال إشعار لعميل
@@ -162,5 +275,8 @@ router.post("/send-test", async (req, res) => {
   }
 });
 
+
+router.sendAdminNotification =
+  sendAdminNotification;
 
 module.exports = router;
