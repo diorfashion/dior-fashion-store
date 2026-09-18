@@ -263,16 +263,25 @@
         ></textarea>
 
 
-        <label>
-          المخزون
-        </label>
+      <label>المخزون العام</label>
+<input
+  id="stock"
+  type="number"
+  min="0"
+  value="0"
+>
 
-        <input
-          id="stock"
-          type="number"
-          min="0"
-          value="0"
-        >
+<label>المقاسات والكميات</label>
+
+<div id="sizesInputs"></div>
+
+<button
+  type="button"
+  class="add-image-button"
+  onclick="addSizeInput()"
+>
+  + إضافة مقاس
+</button>
 
 
         <label>
