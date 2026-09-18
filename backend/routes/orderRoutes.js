@@ -443,48 +443,61 @@ router.post("/", async (req, res) => {
 // جلب جميع طلبات العميل بواسطة رقم الهاتف
 // ==========================================
 
+// ==========================================
+// جلب جميع طلبات العميل بواسطة رقم الهاتف
+// ==========================================
+
 router.get("/my-orders", async (req, res) => {
-
   try {
-
     const phone = String(
       req.query.phone || ""
     ).trim();
 
-
     if (!phone) {
-
       return res.status(400).json({
-
         success: false,
-
-        message:
-          "رقم الهاتف مطلوب"
-
+        message: "رقم الهاتف مطلوب"
       });
-
     }
 
-
-    const orders =
-      await Order.find({
-
-        "customer.phone":
-          phone
-
-      })
+    const orders = await Order.find({
+      "customer.phone": phone
+    })
       .sort({
         createdAt: -1
       })
       .lean();
 
+    // جلب صور المنتجات الحالية
+    const productIds = [];
+
+    orders.forEach(order => {
+      (order.items || []).forEach(item => {
+        if (item.productId) {
+          productIds.push(item.productId);
+        }
+      });
+    });
+
+    const products = await Product.find({
+      _id: {
+        $in: productIds
+      }
+    })
+      .select("_id images")
+      .lean();
+
+    const productMap = {};
+
+    products.forEach(product => {
+      productMap[String(product._id)] =
+        product.images || [];
+    });
 
     res.json({
-
       success: true,
 
       orders: orders.map(order => ({
-
         orderNumber:
           order.orderNumber,
 
@@ -494,8 +507,39 @@ router.get("/my-orders", async (req, res) => {
         paymentMethod:
           order.paymentMethod,
 
-        items:
-          order.items,
+        items: (order.items || []).map(item => {
+          const currentImages =
+            productMap[
+              String(item.productId)
+            ] || [];
+
+          return {
+            productId:
+              item.productId,
+
+            name:
+              item.name,
+
+            price:
+              item.price,
+
+            // نستخدم الصورة الحالية للمنتج
+            // وإذا لم توجد نستخدم الصورة المحفوظة
+            image:
+              currentImages.length
+                ? currentImages[0]
+                : item.image || "",
+
+            size:
+              item.size || "",
+
+            quantity:
+              item.quantity,
+
+            subtotal:
+              item.subtotal
+          };
+        }),
 
         subtotal:
           order.subtotal,
@@ -514,34 +558,22 @@ router.get("/my-orders", async (req, res) => {
 
         createdAt:
           order.createdAt
-
       }))
-
     });
 
-
   } catch (error) {
-
     console.error(
       "Get customer orders error:",
       error
     );
 
-
     res.status(500).json({
-
       success: false,
-
       message:
         "حدث خطأ أثناء تحميل الطلبات"
-
     });
-
   }
-
 });
-
-
 // ==========================================
 // جلب جميع الطلبات للإدارة
 // ==========================================
