@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>تفاصيل المنتج | ديور للأزياء</title>
+
+  <link
+    rel="stylesheet"
+    href="style.css"
+  >
+
+  <style>
+
+    .product-details-page {
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    .back-button {
+      display: inline-block;
+      margin-bottom: 20px;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      background: #eee;
+      font-size: 15px;
+    }
+
+    .details-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      background: white;
+      border-radius: 18px;
+      padding: 25px;
+    }
+
+    .main-product-image {
+      width: 100%;
+      max-height: 550px;
+      object-fit: contain;
+      border-radius: 15px;
+    }
+
+    .product-thumbnails {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      margin-top: 15px;
+    }
+
+    .product-thumbnail {
+      width: 75px;
+      height: 75px;
+      object-fit: cover;
+      border-radius: 10px;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+
+    .product-thumbnail.active {
+      border-color: #000;
+    }
+
+    .details-name {
+      font-size: 30px;
+      margin-bottom: 10px;
+    }
+
+    .details-category {
+      color: #777;
+      margin-bottom: 20px;
+    }
+
+    .details-price {
+      font-size: 25px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .details-old-price {
+      text-decoration: line-through;
+      color: #999;
+      font-size: 18px;
+      margin-right: 10px;
+    }
+
+    .details-description {
+      line-height: 1.9;
+      margin: 25px 0;
+      white-space: pre-line;
+    }
+
+    .sizes-title {
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+
+    .sizes-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 25px;
+    }
+
+    .size-button {
+      min-width: 55px;
+      padding: 12px 15px;
+      border: 1px solid #ccc;
+      background: white;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .size-button.selected {
+      background: #111;
+      color: white;
+      border-color: #111;
+    }
+
+    .size-button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .selected-size-info {
+      margin-top: -15px;
+      margin-bottom: 20px;
+      color: #666;
+    }
+
+    .quantity-box {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .quantity-box button {
+      width: 40px;
+      height: 40px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 20px;
+    }
+
+    .quantity-box span {
+      min-width: 30px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .details-add-cart {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 12px;
+      background: #111;
+      color: white;
+      cursor: pointer;
+      font-size: 17px;
+    }
+
+    .details-add-cart:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .loading-details {
+      text-align: center;
+      padding: 60px;
+    }
+
+    @media (max-width: 700px) {
+
+      .details-layout {
+        grid-template-columns: 1fr;
+        gap: 25px;
+        padding: 15px;
+      }
+
+      .details-name {
+        font-size: 24px;
+      }
+
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <main class="product-details-page">
+
+    <button
+      class="back-button"
+      onclick="history.back()"
+    >
+      ← العودة
+    </button>
+
+    <div
+      id="productDetails"
+      class="loading-details"
+    >
+      جاري تحميل المنتج...
+    </div>
+
+  </main>
+
+
+  <script src="product.js"></script>
+
+</body>
+
+</html>
