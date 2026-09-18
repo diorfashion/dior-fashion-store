@@ -1,18 +1,29 @@
 const API_URL = "/api/orders";
 
-let cart =
-  JSON.parse(
-    localStorage.getItem("dior_cart") || "[]"
-  );
+let cart = JSON.parse(
+  localStorage.getItem("dior_cart") || "[]"
+);
+
 let map = null;
 let marker = null;
 
 let selectedLatitude = null;
 let selectedLongitude = null;
 
+
+// =========================
+// الخريطة
+// =========================
+
 function initMap() {
 
-  // صنعاء كنقطة بداية تقريبية للخريطة
+  const mapElement =
+    document.getElementById("map");
+
+  if (!mapElement) {
+    return;
+  }
+
   const defaultLatitude = 15.3694;
   const defaultLongitude = 44.1910;
 
@@ -24,62 +35,49 @@ function initMap() {
     13
   );
 
-
   L.tileLayer(
     "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
     {
       maxZoom: 19,
       attribution:
-        '&copy; OpenStreetMap contributors'
+        "&copy; OpenStreetMap contributors"
     }
   ).addTo(map);
 
+  map.on("click", function(event) {
 
-  // الضغط على الخريطة
+    setDeliveryLocation(
+      event.latlng.lat,
+      event.latlng.lng
+    );
 
-  map.on(
-    "click",
-    function(event) {
-
-      setDeliveryLocation(
-        event.latlng.lat,
-        event.latlng.lng
-      );
-
-    }
-  );
+  });
 }
 
+
+// =========================
+// تحديد الموقع
+// =========================
 
 function setDeliveryLocation(
   latitude,
   longitude
 ) {
 
-  selectedLatitude =
-    latitude;
-
-  selectedLongitude =
-    longitude;
-
-
-  // إنشاء العلامة أول مرة
+  selectedLatitude = latitude;
+  selectedLongitude = longitude;
 
   if (!marker) {
 
-    marker =
-      L.marker(
-        [
-          latitude,
-          longitude
-        ],
-        {
-          draggable: true
-        }
-      ).addTo(map);
-
-
-    // إذا حرك العميل العلامة
+    marker = L.marker(
+      [
+        latitude,
+        longitude
+      ],
+      {
+        draggable: true
+      }
+    ).addTo(map);
 
     marker.on(
       "dragend",
@@ -98,15 +96,12 @@ function setDeliveryLocation(
 
   } else {
 
-    marker.setLatLng(
-      [
-        latitude,
-        longitude
-      ]
-    );
+    marker.setLatLng([
+      latitude,
+      longitude
+    ]);
 
   }
-
 
   map.setView(
     [
@@ -116,30 +111,36 @@ function setDeliveryLocation(
     16
   );
 
+  const locationText =
+    document.getElementById(
+      "locationText"
+    );
 
-  document.getElementById(
-    "locationText"
-  ).innerHTML = `
-    <strong>
-      تم تحديد موقع التوصيل 📍
-    </strong>
-    <br>
-    خط العرض:
-    ${latitude.toFixed(6)}
-    <br>
-    خط الطول:
-    ${longitude.toFixed(6)}
-  `;
+  if (locationText) {
+
+    locationText.innerHTML = `
+      <strong>
+        تم تحديد موقع التوصيل 📍
+      </strong>
+      <br>
+      خط العرض:
+      ${latitude.toFixed(6)}
+      <br>
+      خط الطول:
+      ${longitude.toFixed(6)}
+    `;
+
+  }
 }
 
 
-// استخدام GPS الهاتف
+// =========================
+// استخدام موقع الهاتف
+// =========================
 
 function getCurrentLocation() {
 
-  if (
-    !navigator.geolocation
-  ) {
+  if (!navigator.geolocation) {
 
     alert(
       "المتصفح لا يدعم تحديد الموقع"
@@ -148,15 +149,17 @@ function getCurrentLocation() {
     return;
   }
 
-
   const locationText =
     document.getElementById(
       "locationText"
     );
 
-  locationText.textContent =
-    "جاري تحديد موقعك...";
+  if (locationText) {
 
+    locationText.textContent =
+      "جاري تحديد موقعك...";
+
+  }
 
   navigator.geolocation.getCurrentPosition(
 
@@ -167,7 +170,6 @@ function getCurrentLocation() {
 
       const longitude =
         position.coords.longitude;
-
 
       setDeliveryLocation(
         latitude,
@@ -187,20 +189,28 @@ function getCurrentLocation() {
         "لم نتمكن من الحصول على موقعك. تأكد من السماح للموقع في الهاتف."
       );
 
-      locationText.textContent =
-        "لم يتم تحديد موقع";
+      if (locationText) {
+
+        locationText.textContent =
+          "لم يتم تحديد موقع";
+
+      }
+
     },
 
     {
       enableHighAccuracy: true,
-
       timeout: 10000,
-
       maximumAge: 0
     }
+
   );
 }
-// تشغيل الصفحة
+
+
+// =========================
+// تشغيل صفحة إتمام الطلب
+// =========================
 
 function initCheckout() {
 
@@ -209,11 +219,18 @@ function initCheckout() {
       "checkoutContent"
     );
 
+  if (!container) {
+    return;
+  }
+
   if (!cart.length) {
 
     container.innerHTML = `
       <div class="checkout-card empty-checkout">
-        <h2>السلة فارغة 🛒</h2>
+
+        <h2>
+          السلة فارغة 🛒
+        </h2>
 
         <p>
           أضف منتجات إلى السلة أولاً.
@@ -225,6 +242,7 @@ function initCheckout() {
         >
           العودة للمتجر
         </button>
+
       </div>
     `;
 
@@ -235,7 +253,9 @@ function initCheckout() {
 }
 
 
+// =========================
 // عرض صفحة الطلب
+// =========================
 
 function renderCheckout() {
 
@@ -248,8 +268,8 @@ function renderCheckout() {
     cart.reduce(
       (sum, item) =>
         sum +
-        item.price *
-        item.quantity,
+        Number(item.price) *
+        Number(item.quantity),
       0
     );
 
@@ -258,7 +278,6 @@ function renderCheckout() {
   const total =
     subtotal +
     deliveryFee;
-
 
   container.innerHTML = `
 
@@ -285,7 +304,6 @@ function renderCheckout() {
             placeholder="اكتب اسمك"
           >
 
-
           <label>
             رقم الهاتف
           </label>
@@ -296,7 +314,6 @@ function renderCheckout() {
             required
             placeholder="مثال: 777000000"
           >
-
 
           <label>
             عنوان التوصيل
@@ -309,44 +326,44 @@ function renderCheckout() {
           ></textarea>
 
 
-        <div class="map-box">
+          <div class="map-box">
 
-  <strong>
-    📍 حدد موقع التوصيل
-  </strong>
+            <strong>
+              📍 حدد موقع التوصيل
+            </strong>
 
-  <p>
-    اضغط على الخريطة لتحديد موقعك،
-    أو استخدم موقع الهاتف الحالي.
-  </p>
+            <p>
+              اضغط على الخريطة لتحديد موقعك،
+              أو استخدم موقع الهاتف الحالي.
+            </p>
 
-  <button
-    type="button"
-    class="map-button"
-    onclick="getCurrentLocation()"
-  >
-    📍 استخدام موقعي الحالي
-  </button>
+            <button
+              type="button"
+              class="map-button"
+              onclick="getCurrentLocation()"
+            >
+              📍 استخدام موقعي الحالي
+            </button>
 
-  <div
-    id="map"
-    style="
-      height:350px;
-      width:100%;
-      margin-top:15px;
-      border-radius:12px;
-      overflow:hidden;
-    "
-  ></div>
+            <div
+              id="map"
+              style="
+                height:350px;
+                width:100%;
+                margin-top:15px;
+                border-radius:12px;
+                overflow:hidden;
+              "
+            ></div>
 
-  <div
-    id="locationText"
-    class="location-text"
-  >
-    لم يتم تحديد موقع بعد
-  </div>
+            <div
+              id="locationText"
+              class="location-text"
+            >
+              لم يتم تحديد موقع بعد
+            </div>
 
-           
+          </div>
 
 
           <label>
@@ -391,7 +408,9 @@ function renderCheckout() {
             تأكيد الطلب
           </button>
 
-          <div id="checkoutMessage"></div>
+          <div
+            id="checkoutMessage"
+          ></div>
 
         </form>
 
@@ -405,25 +424,36 @@ function renderCheckout() {
         </h2>
 
         <div>
+
           ${
             cart.map(item => `
+
               <div class="order-item">
 
                 <img
-                  src="${escapeHtml(item.image)}"
-                  alt="${escapeHtml(item.name)}"
+                  src="${escapeHtml(
+                    item.image || ""
+                  )}"
+                  alt="${escapeHtml(
+                    item.name
+                  )}"
                   onerror="this.src='images/logo.jpg'"
                 >
 
                 <div class="order-item-info">
 
                   <strong>
-                    ${escapeHtml(item.name)}
+                    ${escapeHtml(
+                      item.name
+                    )}
                   </strong>
 
                   <div>
                     المقاس:
-                    ${escapeHtml(item.size || "بدون مقاس")}
+                    ${escapeHtml(
+                      item.size ||
+                      "بدون مقاس"
+                    )}
                   </div>
 
                   <div>
@@ -433,20 +463,23 @@ function renderCheckout() {
 
                   <div>
                     ${formatPrice(
-                      item.price *
-                      item.quantity
+                      Number(item.price) *
+                      Number(item.quantity)
                     )}
                   </div>
 
                 </div>
 
               </div>
+
             `).join("")
           }
+
         </div>
 
 
         <div class="summary-row">
+
           <span>
             المجموع
           </span>
@@ -454,10 +487,12 @@ function renderCheckout() {
           <strong>
             ${formatPrice(subtotal)}
           </strong>
+
         </div>
 
 
         <div class="summary-row">
+
           <span>
             التوصيل
           </span>
@@ -465,10 +500,14 @@ function renderCheckout() {
           <strong>
             ${formatPrice(deliveryFee)}
           </strong>
+
         </div>
 
 
-        <div class="summary-row summary-total">
+        <div
+          class="summary-row summary-total"
+        >
+
           <span>
             الإجمالي
           </span>
@@ -476,13 +515,17 @@ function renderCheckout() {
           <span>
             ${formatPrice(total)}
           </span>
+
         </div>
 
       </section>
 
     </div>
+
   `;
 
+
+  // ربط زر تأكيد الطلب
 
   document
     .getElementById("checkoutForm")
@@ -490,38 +533,43 @@ function renderCheckout() {
       "submit",
       submitOrder
     );
-  setTimeout(() => {
-  initMap();
-}, 100);
 
 
+  // تشغيل الخريطة بعد ظهورها
 
-// تحديد الموقع
-
-function selectLocation() {
-
-  alert(
-    "سنربط الخريطة الفعلية في الخطوة التالية."
+  setTimeout(
+    () => {
+      initMap();
+    },
+    100
   );
+
 }
 
 
+// =========================
 // إرسال الطلب
+// =========================
 
 async function submitOrder(event) {
 
   event.preventDefault();
+
+
+  // التأكد من تحديد الموقع
+
   if (
-  selectedLatitude === null ||
-  selectedLongitude === null
-) {
+    selectedLatitude === null ||
+    selectedLongitude === null
+  ) {
 
-  alert(
-    "يرجى تحديد موقع التوصيل على الخريطة 📍"
-  );
+    alert(
+      "يرجى تحديد موقع التوصيل على الخريطة 📍"
+    );
 
-  return;
+    return;
   }
+
 
   const button =
     document.getElementById(
@@ -538,16 +586,6 @@ async function submitOrder(event) {
 
   button.textContent =
     "جاري إرسال الطلب...";
-
-
-  const subtotal =
-    cart.reduce(
-      (sum, item) =>
-        sum +
-        item.price *
-        item.quantity,
-      0
-    );
 
 
   const deliveryFee = 0;
@@ -572,33 +610,35 @@ async function submitOrder(event) {
           )
           .value
           .trim()
+
     },
 
 
     delivery: {
 
-  address:
-    document
-      .getElementById(
-        "deliveryAddress"
-      )
-      .value
-      .trim(),
+      address:
+        document
+          .getElementById(
+            "deliveryAddress"
+          )
+          .value
+          .trim(),
 
-  latitude:
-    selectedLatitude,
+      latitude:
+        selectedLatitude,
 
-  longitude:
-    selectedLongitude,
+      longitude:
+        selectedLongitude,
 
-  notes:
-    document
-      .getElementById(
-        "deliveryNotes"
-      )
-      .value
-      .trim()
-},
+      notes:
+        document
+          .getElementById(
+            "deliveryNotes"
+          )
+          .value
+          .trim()
+
+    },
 
 
     paymentMethod:
@@ -619,12 +659,13 @@ async function submitOrder(event) {
           item.size || "",
 
         quantity:
-          item.quantity
+          Number(item.quantity)
 
       })),
 
 
     deliveryFee
+
   };
 
 
@@ -659,11 +700,9 @@ async function submitOrder(event) {
         data.message ||
         "تعذر إنشاء الطلب"
       );
+
     }
 
-
-    // الطلب نجح
-    // نمسح السلة
 
     localStorage.removeItem(
       "dior_cart"
@@ -679,6 +718,11 @@ async function submitOrder(event) {
 
   } catch (error) {
 
+    console.error(
+      "Order error:",
+      error
+    );
+
     message.textContent =
       error.message;
 
@@ -689,11 +733,15 @@ async function submitOrder(event) {
 
     button.textContent =
       "تأكيد الطلب";
+
   }
+
 }
 
 
+// =========================
 // نجاح الطلب
+// =========================
 
 function showOrderSuccess(order) {
 
@@ -715,22 +763,36 @@ function showOrderSuccess(order) {
       </p>
 
       <div class="order-number">
+
         رقم الطلب:
-        ${escapeHtml(order.orderNumber)}
+        ${escapeHtml(
+          order.orderNumber
+        )}
+
       </div>
 
       <p>
+
         حالة الطلب:
+
         <strong>
-          ${escapeHtml(order.status)}
+          ${escapeHtml(
+            order.status
+          )}
         </strong>
+
       </p>
 
       <p>
+
         الإجمالي:
+
         <strong>
-          ${formatPrice(order.total)}
+          ${formatPrice(
+            order.total
+          )}
         </strong>
+
       </p>
 
       <button
@@ -741,31 +803,55 @@ function showOrderSuccess(order) {
       </button>
 
     </div>
+
   `;
 }
 
 
-// السعر
+// =========================
+// تنسيق السعر
+// =========================
 
 function formatPrice(price) {
 
   return Number(price)
     .toLocaleString("ar-YE")
     + " ريال";
+
 }
 
 
+// =========================
 // حماية HTML
+// =========================
 
 function escapeHtml(value) {
 
   return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
+
 }
 
+
+// تشغيل الصفحة
 
 initCheckout();
