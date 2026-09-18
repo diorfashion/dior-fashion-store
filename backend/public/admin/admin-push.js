@@ -202,22 +202,41 @@ async function enableAdminNotifications() {
     // إنشاء اشتراك جديد
     // =====================================
 
-    if (!subscription) {
+ if (!subscription) {
 
-      subscription =
-        await registration.pushManager.subscribe({
+  try {
 
-          userVisibleOnly: true,
+    subscription =
+      await registration.pushManager.subscribe({
 
-          applicationServerKey:
-            urlBase64ToUint8Array(
-              keyData.publicKey
-            )
+        userVisibleOnly: true,
 
-        });
+        applicationServerKey:
+          urlBase64ToUint8Array(
+            keyData.publicKey
+          )
 
-    }
+      });
 
+  } catch (pushError) {
+
+    console.error(
+      "Push subscribe failed:",
+      pushError.name,
+      pushError.message,
+      pushError
+    );
+
+    throw new Error(
+      "فشل إنشاء اشتراك الإشعارات: " +
+      pushError.name +
+      " - " +
+      pushError.message
+    );
+
+  }
+
+ }
 
     // =====================================
     // التأكد من وجود الاشتراك
