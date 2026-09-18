@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>إتمام الطلب | ديور للأزياء</title>
+
+  <link
+    rel="stylesheet"
+    href="style.css"
+  >
+
+  <style>
+    .checkout-page {
+      max-width: 1000px;
+      margin: 30px auto;
+      padding: 20px;
+    }
+
+    .checkout-title {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .checkout-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+    }
+
+    .checkout-card {
+      background: white;
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 4px 18px rgba(0,0,0,.06);
+    }
+
+    .checkout-card h2 {
+      margin-top: 0;
+    }
+
+    .checkout-form label {
+      display: block;
+      margin: 15px 0 7px;
+      font-weight: bold;
+    }
+
+    .checkout-form input,
+    .checkout-form textarea,
+    .checkout-form select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 13px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 15px;
+    }
+
+    .checkout-form textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .map-box {
+      border: 2px dashed #ccc;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .map-button {
+      border: none;
+      padding: 12px 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      background: #eee;
+      font-family: inherit;
+    }
+
+    .location-text {
+      margin-top: 10px;
+      color: #555;
+      line-height: 1.7;
+    }
+
+    .order-item {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .order-item img {
+      width: 70px;
+      height: 70px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+
+    .order-item-info {
+      flex: 1;
+    }
+
+    .order-item-info strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+    }
+
+    .summary-total {
+      border-top: 1px solid #ddd;
+      margin-top: 10px;
+      padding-top: 15px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .submit-order {
+      width: 100%;
+      border: none;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 12px;
+      background: #111;
+      color: white;
+      font-family: inherit;
+      font-size: 17px;
+      cursor: pointer;
+    }
+
+    .submit-order:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    .empty-checkout {
+      text-align: center;
+      padding: 50px 20px;
+    }
+
+    .success-box {
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .success-box h2 {
+      margin-bottom: 15px;
+    }
+
+    .order-number {
+      font-size: 22px;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+
+    @media (max-width: 700px) {
+      .checkout-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <main class="checkout-page">
+
+    <h1 class="checkout-title">
+      إتمام الطلب
+    </h1>
+
+    <div id="checkoutContent">
+      جاري تحميل الطلب...
+    </div>
+
+  </main>
+
+  <script src="checkout.js"></script>
+
+</body>
+
+</html>
