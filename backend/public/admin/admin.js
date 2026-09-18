@@ -779,3 +779,35 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 
 }
+async function loadOrderCount() {
+  try {
+    const response = await fetch(
+      "/api/orders/admin",
+      {
+        credentials: "include"
+      }
+    );
+
+    if (!response.ok) {
+      return;
+    }
+
+    const data = await response.json();
+
+    const orderCount =
+      document.getElementById("orderCount");
+
+    if (orderCount) {
+      orderCount.textContent =
+        (data.orders || []).length;
+    }
+
+  } catch (error) {
+    console.error(
+      "تعذر تحميل عدد الطلبات:",
+      error
+    );
+  }
+}
+
+loadOrderCount();
