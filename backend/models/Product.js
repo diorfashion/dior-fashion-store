@@ -1,5 +1,25 @@
 const mongoose = require("mongoose");
 
+const sizeSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true
+    },
+
+    quantity: {
+      type: Number,
+      required: true,
+      min: 0,
+      default: 0
+    }
+  },
+  {
+    _id: false
+  }
+);
+
 const productSchema = new mongoose.Schema(
   {
     name: {
@@ -36,6 +56,11 @@ const productSchema = new mongoose.Schema(
       default: []
     },
 
+    sizes: {
+      type: [sizeSchema],
+      default: []
+    },
+
     isAvailable: {
       type: Boolean,
       default: true
@@ -52,4 +77,5 @@ const productSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("Product", productSchema);
+module.exports =
+  mongoose.model("Product", productSchema);
