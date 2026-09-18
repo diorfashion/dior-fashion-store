@@ -562,5 +562,17 @@ select:focus {
     grid-template-columns: 1fr 90px 40px;
   }
 }
+  .order-product-image {
+  width: 65px;
+  height: 65px;
+
+  object-fit: cover;
+
+  border-radius: 10px;
+
+  background: #eee;
+
+  flex-shrink: 0;
+  }
 
 }
