@@ -1,10 +1,3 @@
-const API_URL = "/api/orders/track";
-
-
-// =========================
-// حالات الطلب
-// =========================
-
 const ORDER_STATUSES = [
   "تم الطلب",
   "تأكيد الدفع",
@@ -13,229 +6,281 @@ const ORDER_STATUSES = [
   "تم التوصيل"
 ];
 
+const form =
+  document.getElementById("trackForm");
 
-// =========================
-// تشغيل الصفحة
-// =========================
+const phoneInput =
+  document.getElementById("customerPhone");
 
-document
-  .getElementById("trackForm")
-  .addEventListener(
-    "submit",
-    trackOrder
-  );
+const button =
+  document.getElementById("trackButton");
 
+const message =
+  document.getElementById("trackMessage");
 
-// =========================
-// البحث عن الطلب
-// =========================
+const ordersResult =
+  document.getElementById("ordersResult");
 
-async function trackOrder(event) {
-
-  event.preventDefault();
+const ordersList =
+  document.getElementById("ordersList");
 
 
-  const orderNumber =
-    document
-      .getElementById("orderNumber")
-      .value
-      .trim();
+form.addEventListener(
+  "submit",
+  async function (event) {
+
+    event.preventDefault();
+
+    const phone =
+      phoneInput.value.trim();
+
+    if (!phone) {
+      showMessage(
+        "يرجى إدخال رقم الهاتف"
+      );
+      return;
+    }
+
+    button.disabled = true;
+    button.textContent =
+      "جاري البحث...";
+
+    message.textContent = "";
+    ordersResult.classList.add("hidden");
+    ordersList.innerHTML = "";
+
+    try {
+
+      const response =
+        await fetch(
+          `/api/orders/my-orders?phone=${encodeURIComponent(phone)}`
+        );
+
+      const data =
+        await response.json();
 
 
-  const phone =
-    document
-      .getElementById("customerPhone")
-      .value
-      .trim();
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+          "تعذر تحميل الطلبات"
+        );
+      }
 
 
-  const button =
-    document.getElementById(
-      "trackButton"
-    );
+      const orders =
+        data.orders || [];
 
 
-  const message =
-    document.getElementById(
-      "trackMessage"
-    );
+      if (!orders.length) {
+
+        showMessage(
+          "لا توجد طلبات مرتبطة بهذا الرقم",
+          false
+        );
+
+        return;
+      }
 
 
-  const result =
-    document.getElementById(
-      "orderResult"
-    );
+      message.textContent =
+        `تم العثور على ${orders.length} طلب`;
 
 
-  if (!orderNumber || !phone) {
-
-    message.textContent =
-      "يرجى إدخال رقم الطلب ورقم الهاتف";
-
-    return;
-  }
+      message.style.color = "green";
 
 
-  button.disabled = true;
-
-  button.textContent =
-    "جاري البحث...";
-
-  message.textContent = "";
-
-  result.classList.add("hidden");
+      ordersList.innerHTML =
+        orders
+          .map(renderOrder)
+          .join("");
 
 
-  try {
-
-    const response =
-      await fetch(
-        API_URL,
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
-
-          body:
-            JSON.stringify({
-
-              orderNumber,
-
-              phone
-
-            })
-        }
+      ordersResult.classList.remove(
+        "hidden"
       );
 
 
-    const data =
-      await response.json();
+    } catch (error) {
 
-
-    if (!response.ok) {
-
-      throw new Error(
-        data.message ||
-        "لم يتم العثور على الطلب"
+      showMessage(
+        error.message ||
+        "حدث خطأ أثناء البحث"
       );
+
+    } finally {
+
+      button.disabled = false;
+
+      button.textContent =
+        "🔎 عرض طلباتي";
 
     }
 
-
-    renderOrder(
-      data.order
-    );
-
-
-  } catch (error) {
-
-    console.error(
-      "Track order error:",
-      error
-    );
-
-    message.textContent =
-      error.message ||
-      "حدث خطأ أثناء البحث";
-
-
-  } finally {
-
-    button.disabled = false;
-
-    button.textContent =
-      "🔎 البحث عن الطلب";
-
   }
+);
 
-}
-
-
-// =========================
-// عرض الطلب
-// =========================
 
 function renderOrder(order) {
 
-  const result =
-    document.getElementById(
-      "orderResult"
+  const statusIndex =
+    ORDER_STATUSES.indexOf(
+      order.status
     );
 
 
-  result.classList.remove(
-    "hidden"
-  );
+  const timeline =
+    ORDER_STATUSES
+      .map((status, index) => {
+
+        let className = "";
+
+        if (index < statusIndex) {
+          className = "completed";
+        }
+
+        if (index === statusIndex) {
+          className = "current";
+        }
+
+        return `
+          <div class="status-step ${className}">
+
+            <div class="status-icon">
+              ${
+                index <= statusIndex
+                  ? "✓"
+                  : index + 1
+              }
+            </div>
+
+            <span>
+              ${escapeHtml(status)}
+            </span>
+
+          </div>
+        `;
+
+      })
+      .join("");
 
 
-  result.innerHTML = `
+  const products =
+    (order.items || [])
+      .map(item => {
 
-    <section class="track-card">
+        return `
+          <div class="order-product">
+
+            ${
+              item.image
+                ? `
+                  <img
+                    src="${escapeHtml(item.image)}"
+                    alt=""
+                  >
+                `
+                : `
+                  <div
+                    style="
+                      width:70px;
+                      height:70px;
+                      border-radius:10px;
+                      background:#eee;
+                    "
+                  ></div>
+                `
+            }
+
+            <div class="product-info">
+
+              <div class="product-name">
+                ${escapeHtml(
+                  item.name || "منتج"
+                )}
+              </div>
+
+              <div class="product-detail">
+                المقاس:
+                ${escapeHtml(
+                  item.size ||
+                  "بدون مقاس"
+                )}
+              </div>
+
+              <div class="product-detail">
+                الكمية:
+                ${item.quantity || 1}
+              </div>
+
+              <div class="product-detail">
+                السعر:
+                ${formatMoney(item.price)}
+                ريال
+              </div>
+
+            </div>
+
+          </div>
+        `;
+
+      })
+      .join("");
+
+
+  const createdAt =
+    order.createdAt
+      ? new Date(
+          order.createdAt
+        ).toLocaleString("ar-YE")
+      : "";
+
+
+  return `
+    <article class="order-card">
 
       <div class="order-header">
 
-        <h2>
-          تفاصيل الطلب
-        </h2>
+        <div>
 
-        <div class="order-number">
-          ${escapeHtml(
-            order.orderNumber
-          )}
+          <div class="order-number">
+            طلب رقم:
+            ${escapeHtml(
+              order.orderNumber
+            )}
+          </div>
+
+          <div class="order-date">
+            ${escapeHtml(createdAt)}
+          </div>
+
         </div>
 
-        <div class="order-date">
-          تاريخ الطلب:
-          ${formatDate(
-            order.createdAt
+        <div class="status-badge">
+          ${escapeHtml(
+            order.status
           )}
         </div>
 
       </div>
 
-
-      <!-- حالة الطلب -->
 
       <div class="status-timeline">
 
-        ${renderStatusTimeline(
-          order.status
-        )}
+        ${timeline}
 
       </div>
 
 
-      <!-- المنتجات -->
-
-      <h2 class="products-title">
+      <h3 class="products-title">
         🛍️ المنتجات
-      </h2>
+      </h3>
+
 
       <div>
-
-        ${
-          order.items &&
-          order.items.length
-            ? order.items
-                .map(
-                  item =>
-                    renderProduct(item)
-                )
-                .join("")
-            : `
-              <p>
-                لا توجد منتجات في الطلب.
-              </p>
-            `
-        }
-
+        ${products}
       </div>
 
-
-      <!-- الدفع -->
 
       <div class="payment-info">
 
@@ -243,32 +288,27 @@ function renderOrder(order) {
           طريقة الدفع:
         </strong>
 
-        <span>
-          ${escapeHtml(
-            order.paymentMethod
-          )}
-        </span>
+        ${escapeHtml(
+          order.paymentMethod || ""
+        )}
 
       </div>
 
 
-      <!-- المبلغ -->
-
-      <div
-        style="margin-top:20px;"
-      >
+      <div class="summary">
 
         <div class="summary-row">
 
           <span>
-            المجموع
+            المجموع الفرعي
           </span>
 
-          <strong>
-            ${formatPrice(
+          <span>
+            ${formatMoney(
               order.subtotal
             )}
-          </strong>
+            ريال
+          </span>
 
         </div>
 
@@ -276,324 +316,84 @@ function renderOrder(order) {
         <div class="summary-row">
 
           <span>
-            التوصيل
+            رسوم التوصيل
           </span>
 
-          <strong>
-            ${formatPrice(
+          <span>
+            ${formatMoney(
               order.deliveryFee
             )}
-          </strong>
+            ريال
+          </span>
 
         </div>
 
 
-        <div
-          class="summary-row summary-total"
-        >
+        <div class="summary-row summary-total">
 
           <span>
             الإجمالي
           </span>
 
           <span>
-            ${formatPrice(
+            ${formatMoney(
               order.total
             )}
+            ريال
           </span>
 
         </div>
 
       </div>
 
-
-      <a
-        href="/"
-        class="back-button"
-      >
-        🏠 العودة إلى المتجر
-      </a>
-
-    </section>
-
+    </article>
   `;
+}
 
 
-  result.scrollIntoView({
-    behavior: "smooth",
-    block: "start"
-  });
+function formatMoney(value) {
+
+  return Number(
+    value || 0
+  ).toLocaleString("en-US");
 
 }
 
 
-// =========================
-// عرض مراحل الطلب
-// =========================
-
-function renderStatusTimeline(
-  currentStatus
+function showMessage(
+  text,
+  isError = true
 ) {
 
-  const currentIndex =
-    ORDER_STATUSES.indexOf(
-      currentStatus
-    );
+  message.textContent = text;
 
-
-  return ORDER_STATUSES
-    .map(
-      (status, index) => {
-
-        let className =
-          "status-step";
-
-
-        if (
-          index < currentIndex
-        ) {
-
-          className +=
-            " completed";
-
-        }
-
-
-        if (
-          index === currentIndex
-        ) {
-
-          className +=
-            " current";
-
-        }
-
-
-        const icon =
-          index <= currentIndex
-            ? "✓"
-            : "○";
-
-
-        return `
-
-          <div
-            class="${className}"
-          >
-
-            <div class="status-icon">
-              ${icon}
-            </div>
-
-            <div>
-              ${escapeHtml(status)}
-            </div>
-
-          </div>
-
-        `;
-
-      }
-    )
-    .join("");
+  message.style.color =
+    isError
+      ? "crimson"
+      : "#555";
 
 }
 
 
-// =========================
-// عرض المنتج
-// =========================
+function escapeHtml(value) {
 
-function renderProduct(item) {
-
-  const subtotal =
-    Number(item.subtotal) ||
-    Number(item.price) *
-    Number(item.quantity);
-
-
-  const image =
-    item.image ||
-    "images/logo.jpg";
-
-
-  return `
-
-    <div class="order-product">
-
-      <img
-        src="${escapeHtml(image)}"
-        alt="${escapeHtml(item.name)}"
-        onerror="
-          this.src='images/logo.jpg'
-        "
-      >
-
-
-      <div class="product-info">
-
-        <div class="product-name">
-          ${escapeHtml(
-            item.name
-          )}
-        </div>
-
-
-        <div class="product-detail">
-          المقاس:
-          ${escapeHtml(
-            item.size ||
-            "بدون مقاس"
-          )}
-        </div>
-
-
-        <div class="product-detail">
-          الكمية:
-          ${Number(
-            item.quantity
-          )}
-        </div>
-
-
-        <div class="product-detail">
-          السعر:
-          ${formatPrice(
-            item.price
-          )}
-        </div>
-
-
-        <div class="product-detail">
-
-          الإجمالي:
-          <strong>
-            ${formatPrice(
-              subtotal
-            )}
-          </strong>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  `;
-
-}
-
-
-// =========================
-// تنسيق التاريخ
-// =========================
-
-function formatDate(
-  date
-) {
-
-  if (!date) {
-    return "غير معروف";
-  }
-
-
-  try {
-
-    return new Date(
-      date
-    ).toLocaleString(
-      "ar-YE",
-      {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit"
-      }
-    );
-
-  } catch (error) {
-
-    return "غير معروف";
-
-  }
-
-}
-
-
-// =========================
-// تنسيق السعر
-// =========================
-
-function formatPrice(
-  price
-) {
-
-  return Number(price || 0)
-    .toLocaleString("ar-YE")
-    + " ريال";
-
-}
-
-
-// =========================
-// حماية HTML
-// =========================
-
-function escapeHtml(
-  value
-) {
-
-  return String(value)
-    .replaceAll(
-      "&",
-      "&amp;"
-    )
-    .replaceAll(
-      "<",
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(
+      /</g,
       "&lt;"
     )
-    .replaceAll(
-      ">",
+    .replace(
+      />/g,
       "&gt;"
     )
-    .replaceAll(
-      '"',
+    .replace(
+      /"/g,
       "&quot;"
     )
-    .replaceAll(
-      "'",
+    .replace(
+      /'/g,
       "&#039;"
     );
-
-}
-
-
-// =========================
-// قراءة رقم الطلب من الرابط
-// =========================
-//
-// مثال:
-// /track-order.html?order=DF-123-456
-//
-
-const params =
-  new URLSearchParams(
-    window.location.search
-  );
-
-
-const orderFromUrl =
-  params.get("order");
-
-
-if (orderFromUrl) {
-
-  document
-    .getElementById(
-      "orderNumber"
-    )
-    .value =
-      orderFromUrl;
 
 }
