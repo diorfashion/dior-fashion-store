@@ -56,69 +56,84 @@
   <main class="admin-container">
 
 
-    <section class="stats">
+  <section class="stats">
 
-      <div class="stat-card">
+  <div class="stat-card">
 
-        <span>
-          📦
-        </span>
+    <span>
+      📦
+    </span>
 
-        <div>
+    <div>
 
-          <small>
-            المنتجات
-          </small>
+      <small>
+        المنتجات
+      </small>
 
-          <strong id="productCount">
-            0
-          </strong>
+      <strong id="productCount">
+        0
+      </strong>
 
-        </div>
+    </div>
 
-      </div>
+  </div>
 
 
-      <div class="stat-card">
+  <div
+    class="stat-card"
+    onclick="window.location.href='/admin/orders.html'"
+    style="cursor:pointer;"
+  >
 
-        <span>
-          🛒
-        </span>
+    <span>
+      🛒
+    </span>
 
-        <div>
+    <div>
 
-          <small>
-            الطلبات
-          </small>
+      <small>
+        الطلبات
+      </small>
 
-          <strong>
-            قريبًا
-          </strong>
+      <strong id="orderCount">
+        0
+      </strong>
 
-        </div>
+    </div>
 
-      </div>
+  </div>
 
-    </section>
+</section>
 
 
     <section class="admin-section">
 
-      <div class="section-header">
+   <div class="section-header">
 
-        <h1>
-          المنتجات
-        </h1>
+  <h1>
+    المنتجات
+  </h1>
 
-        <button
-          class="primary-button"
-          onclick="openProductForm()"
-        >
-          + إضافة منتج
-        </button>
+  <div style="display:flex; gap:10px; flex-wrap:wrap;">
 
-      </div>
+    <a
+      href="/admin/orders.html"
+      class="primary-button"
+      style="text-decoration:none;"
+    >
+      📦 الطلبات
+    </a>
 
+    <button
+      class="primary-button"
+      onclick="openProductForm()"
+    >
+      + إضافة منتج
+    </button>
+
+  </div>
+
+</div>
 
       <div
         id="productsGrid"
