@@ -3,7 +3,8 @@ const mongoose = require("mongoose");
 const Product = require("../models/Product");
 const Order = require("../models/Order");
 const requireAdmin = require("../middleware/authMiddleware");
-
+const pushRoutes =
+  require("./pushRoutes");
 const webpush = require("web-push");
 const PushSubscription = require("../models/PushSubscription");
 
@@ -375,20 +376,52 @@ router.post("/", async (req, res) => {
 
 
       await order.save({
-        session
-      });
+  session
+});
 
 
-      await session.commitTransaction();
+await session.commitTransaction();
 
-      session.endSession();
+session.endSession();
 
 
-      // =====================================
-      // الرد للمتجر
-      // =====================================
+// =====================================
+// إشعار الأدمن بوصول طلب جديد
+// =====================================
 
-      res.status(201).json({
+try {
+
+  await pushRoutes.sendAdminNotification({
+
+    title:
+      "🛍️ طلب جديد من ديور للأزياء",
+
+    body:
+      `تم استلام الطلب ${order.orderNumber} بقيمة ${Number(
+        order.total || 0
+      ).toLocaleString("en-US")} ريال`,
+
+    url:
+      "/admin/orders.html"
+
+  });
+
+} catch (notificationError) {
+
+  // لا نريد أن يفشل إنشاء الطلب
+  // بسبب مشكلة في الإشعار
+
+  console.error(
+    "Admin notification error:",
+    notificationError
+  );
+
+}
+
+
+// =====================================
+// الرد للمتجر
+// =====================================   res.status(201).json({
 
         success: true,
 
