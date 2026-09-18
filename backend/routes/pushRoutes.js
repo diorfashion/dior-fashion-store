@@ -157,87 +157,93 @@ router.post(
 
 router.post(
   "/admin/subscribe",
-
   requireAdmin,
-
   async (req, res) => {
-
     try {
 
-      const {
-        subscription
-      } = req.body;
+      const { subscription } = req.body;
 
+      // =====================================
+      // التحقق من بيانات الاشتراك
+      // =====================================
 
       if (
         !subscription ||
-        !subscription.endpoint
+        typeof subscription !== "object" ||
+        !subscription.endpoint ||
+        !subscription.keys ||
+        !subscription.keys.p256dh ||
+        !subscription.keys.auth
       ) {
 
         return res.status(400).json({
-
           success: false,
-
-          message:
-            "بيانات اشتراك الأدمن غير صحيحة"
-
+          message: "بيانات اشتراك الادمن غير صحيحة"
         });
 
       }
 
 
-      await AdminPushSubscription.findOneAndUpdate(
+      // =====================================
+      // البحث عن الاشتراك الموجود
+      // =====================================
 
-        {
+      const existing =
+        await AdminPushSubscription.findOne({
           "subscription.endpoint":
             subscription.endpoint
-        },
-
-        {
-          subscription
-        },
-
-        {
-          upsert: true,
-
-          new: true,
-
-          setDefaultsOnInsert:
-            true
-        }
-
-      );
+        });
 
 
-      res.json({
+      // =====================================
+      // تحديث الاشتراك إذا كان موجودًا
+      // =====================================
 
-        success: true,
+      if (existing) {
 
-        message:
-          "تم تفعيل إشعارات الأدمن بنجاح"
+        existing.subscription =
+          subscription;
 
+        await existing.save();
+
+        return res.json({
+          success: true,
+          message:
+            "تم تحديث اشتراك إشعارات الأدمن"
+        });
+
+      }
+
+
+      // =====================================
+      // إنشاء اشتراك جديد
+      // =====================================
+
+      await AdminPushSubscription.create({
+        subscription
       });
 
+
+      res.status(201).json({
+        success: true,
+        message:
+          "تم حفظ اشتراك إشعارات الأدمن"
+      });
 
     } catch (error) {
 
       console.error(
-        "Admin push subscribe error:",
+        "Admin subscribe error:",
         error
       );
 
-
       res.status(500).json({
-
         success: false,
-
         message:
           "تعذر حفظ اشتراك إشعارات الأدمن"
-
       });
 
     }
-
   }
 );
 
