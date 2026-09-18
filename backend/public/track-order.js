@@ -557,12 +557,15 @@ async function enableOrderNotifications() {
 
 
     const registration =
-      await navigator.serviceWorker.register(
-        "/service-worker.js"
-      );
+  await navigator.serviceWorker.register(
+    "/service-worker.js",
+    {
+      scope: "/"
+    }
+  );
 
-
-    await navigator.serviceWorker.ready;
+await registration.update();
+await navigator.serviceWorker.ready;
 
 
     // --------------------------------------
@@ -668,13 +671,24 @@ async function enableOrderNotifications() {
               "application/json"
           },
 
-          body: JSON.stringify({
+          const subscriptionData = subscription.toJSON();
 
-            phone,
+const saveResponse =
+  await fetch(
+    "/api/push/subscribe",
+    {
+      method: "POST",
 
-            subscription
+      headers: {
+        "Content-Type": "application/json"
+      },
 
-          })
+      body: JSON.stringify({
+        phone,
+        subscription: subscriptionData
+      })
+    }
+  );
 
         }
       );
