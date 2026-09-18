@@ -18,9 +18,7 @@ const adminNotificationMessage =
 // إلى Uint8Array
 // ==========================================
 
-function urlBase64ToUint8Array(
-  base64String
-) {
+function urlBase64ToUint8Array(base64String) {
 
   const padding =
     "=".repeat(
@@ -29,8 +27,7 @@ function urlBase64ToUint8Array(
 
   const base64 =
     (
-      base64String +
-      padding
+      base64String + padding
     )
       .replace(/-/g, "+")
       .replace(/_/g, "/");
@@ -47,7 +44,7 @@ function urlBase64ToUint8Array(
 
 
 // ==========================================
-// رسالة
+// عرض الرسالة
 // ==========================================
 
 function showAdminNotificationMessage(
@@ -81,48 +78,42 @@ async function enableAdminNotifications() {
 
   try {
 
-    // --------------------------------------
-    // Service Worker
-    // --------------------------------------
+    // =====================================
+    // التحقق من دعم Service Worker
+    // =====================================
 
     if (!("serviceWorker" in navigator)) {
 
-      showAdminNotificationMessage(
-        "متصفحك لا يدعم إشعارات الطلبات.",
-        "error"
+      throw new Error(
+        "متصفحك لا يدعم إشعارات الطلبات."
       );
 
-      return;
     }
 
 
-    // --------------------------------------
-    // Push API
-    // --------------------------------------
+    // =====================================
+    // التحقق من Push API
+    // =====================================
 
     if (!("PushManager" in window)) {
 
-      showAdminNotificationMessage(
-        "متصفحك لا يدعم إشعارات Push.",
-        "error"
+      throw new Error(
+        "متصفحك لا يدعم إشعارات Push."
       );
 
-      return;
     }
 
 
-    // --------------------------------------
-    // Notification API
-    // --------------------------------------
+    // =====================================
+    // التحقق من Notification API
+    // =====================================
 
     if (!("Notification" in window)) {
 
-      showAdminNotificationMessage(
-        "متصفحك لا يدعم إشعارات المتصفح.",
-        "error"
+      throw new Error(
+        "متصفحك لا يدعم إشعارات المتصفح."
       );
 
-      return;
     }
 
 
@@ -131,9 +122,9 @@ async function enableAdminNotifications() {
     );
 
 
-    // --------------------------------------
+    // =====================================
     // تسجيل Service Worker
-    // --------------------------------------
+    // =====================================
 
     const registration =
       await navigator.serviceWorker.register(
@@ -144,9 +135,9 @@ async function enableAdminNotifications() {
     await navigator.serviceWorker.ready;
 
 
-    // --------------------------------------
-    // طلب الإذن
-    // --------------------------------------
+    // =====================================
+    // طلب إذن الإشعارات
+    // =====================================
 
     let permission =
       Notification.permission;
@@ -162,18 +153,16 @@ async function enableAdminNotifications() {
 
     if (permission !== "granted") {
 
-      showAdminNotificationMessage(
-        "لم يتم السماح بالإشعارات. اسمح بها من إعدادات المتصفح.",
-        "error"
+      throw new Error(
+        "لم يتم السماح بالإشعارات. اسمح بها من إعدادات المتصفح."
       );
 
-      return;
     }
 
 
-    // --------------------------------------
+    // =====================================
     // الحصول على VAPID Public Key
-    // --------------------------------------
+    // =====================================
 
     const keyResponse =
       await fetch(
@@ -201,18 +190,17 @@ async function enableAdminNotifications() {
     }
 
 
-    // --------------------------------------
+    // =====================================
     // الحصول على الاشتراك الحالي
-    // --------------------------------------
+    // =====================================
 
     let subscription =
-      await registration.pushManager
-        .getSubscription();
+      await registration.pushManager.getSubscription();
 
 
-    // --------------------------------------
+    // =====================================
     // إنشاء اشتراك جديد
-    // --------------------------------------
+    // =====================================
 
     if (!subscription) {
 
@@ -231,33 +219,84 @@ async function enableAdminNotifications() {
     }
 
 
-    // --------------------------------------
-    // حفظ اشتراك الأدمن
-    // --------------------------------------
+    // =====================================
+    // التأكد من وجود الاشتراك
+    // =====================================
+
+    if (!subscription) {
+
+      throw new Error(
+        "تعذر إنشاء اشتراك الإشعارات في هذا المتصفح."
+      );
+
+    }
+
+
+    // =====================================
+    // تحويل الاشتراك إلى JSON
+    // =====================================
+
+    const subscriptionData =
+      subscription.toJSON();
+
+
+    // =====================================
+    // التأكد من البيانات
+    // =====================================
+
+    if (
+      !subscriptionData ||
+      !subscriptionData.endpoint ||
+      !subscriptionData.keys ||
+      !subscriptionData.keys.p256dh ||
+      !subscriptionData.keys.auth
+    ) {
+
+      console.error(
+        "Invalid Push Subscription:",
+        subscriptionData
+      );
+
+      throw new Error(
+        "تعذر الحصول على بيانات اشتراك الإشعارات."
+      );
+
+    }
+
+
+    // =====================================
+    // إرسال الاشتراك إلى السيرفر
+    // =====================================
 
     const saveResponse =
-  await fetch(
-    "/api/push/admin/subscribe",
-    {
-      method: "POST",
+      await fetch(
+        "/api/push/admin/subscribe",
+        {
+          method: "POST",
 
-      credentials: "include",
+          credentials: "include",
 
-      headers: {
-        "Content-Type":
-          "application/json"
-      },
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
 
-      body: JSON.stringify({
-        subscription: subscription.toJSON()
-      })
-    }
-  );
+          body: JSON.stringify({
+            subscription:
+              subscriptionData
+          })
+
+        }
+      );
 
 
     const saveData =
       await saveResponse.json();
 
+
+    // =====================================
+    // فحص رد السيرفر
+    // =====================================
 
     if (
       !saveResponse.ok ||
@@ -272,9 +311,9 @@ async function enableAdminNotifications() {
     }
 
 
-    // --------------------------------------
+    // =====================================
     // نجاح
-    // --------------------------------------
+    // =====================================
 
     showAdminNotificationMessage(
       "✅ تم تفعيل إشعارات الطلبات بنجاح.",
