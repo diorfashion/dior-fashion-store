@@ -475,43 +475,29 @@ async function enableOrderNotifications() {
     // التأكد من دعم المتصفح
     // --------------------------------------
 
-    if (
-      !("serviceWorker" in navigator)
-    ) {
+    if (!("serviceWorker" in navigator)) {
+  showNotificationMessage(
+    "❌ Service Worker غير مدعوم في هذه الصفحة.",
+    "error"
+  );
+  return;
+}
 
-      showNotificationMessage(
-        "متصفحك لا يدعم إشعارات الطلبات.",
-        "error"
-      );
+if (!("PushManager" in window)) {
+  showNotificationMessage(
+    "❌ PushManager غير مدعوم في هذه الصفحة.",
+    "error"
+  );
+  return;
+}
 
-      return;
-    }
-
-
-    if (
-      !("PushManager" in window)
-    ) {
-
-      showNotificationMessage(
-        "متصفحك لا يدعم إشعارات الطلبات.",
-        "error"
-      );
-
-      return;
-    }
-
-
-    if (
-      !("Notification" in window)
-    ) {
-
-      showNotificationMessage(
-        "متصفحك لا يدعم إشعارات المتصفح.",
-        "error"
-      );
-
-      return;
-    }
+if (!("Notification" in window)) {
+  showNotificationMessage(
+    "❌ Notification غير مدعوم في هذه الصفحة.",
+    "error"
+  );
+  return;
+}
 
 
     // --------------------------------------
