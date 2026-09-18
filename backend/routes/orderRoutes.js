@@ -4,7 +4,16 @@ const Product = require("../models/Product");
 const Order = require("../models/Order");
 const requireAdmin = require("../middleware/authMiddleware");
 
+const webpush = require("web-push");
+const PushSubscription = require("../models/PushSubscription");
+
 const router = express.Router();
+
+webpush.setVapidDetails(
+  process.env.VAPID_SUBJECT,
+  process.env.VAPID_PUBLIC_KEY,
+  process.env.VAPID_PRIVATE_KEY
+);
 
 
 // ==========================================
@@ -628,6 +637,10 @@ router.get(
 // تغيير حالة الطلب
 // ==========================================
 
+// ==========================================
+// تغيير حالة الطلب + إرسال إشعار للعميل
+// ==========================================
+
 router.put(
   "/admin/:id/status",
   requireAdmin,
@@ -641,17 +654,11 @@ router.put(
 
 
       const allowedStatuses = [
-
         "تم الطلب",
-
         "تأكيد الدفع",
-
         "جاري التجهيز",
-
         "التوصيل",
-
         "تم التوصيل"
-
       ];
 
 
@@ -671,24 +678,18 @@ router.put(
       }
 
 
-      const order =
-        await Order.findByIdAndUpdate(
+      // =====================================
+      // جلب الطلب أولاً لمعرفة حالته القديمة
+      // ورقم هاتف العميل
+      // =====================================
 
-          req.params.id,
-
-          {
-            status
-          },
-
-          {
-            new: true,
-            runValidators: true
-          }
-
-        ).lean();
+      const existingOrder =
+        await Order.findById(
+          req.params.id
+        );
 
 
-      if (!order) {
+      if (!existingOrder) {
 
         return res.status(404).json({
 
@@ -702,23 +703,160 @@ router.put(
       }
 
 
+      const oldStatus =
+        existingOrder.status;
+
+
+      // =====================================
+      // إذا لم تتغير الحالة
+      // لا نرسل إشعاراً جديداً
+      // =====================================
+
+      if (oldStatus === status) {
+
+        return res.json({
+
+          success: true,
+
+          message:
+            "حالة الطلب لم تتغير",
+
+          order: {
+
+            id:
+              existingOrder._id,
+
+            orderNumber:
+              existingOrder.orderNumber,
+
+            status:
+              existingOrder.status
+
+          }
+
+        });
+
+      }
+
+
+      // =====================================
+      // تحديث حالة الطلب
+      // =====================================
+
+      existingOrder.status =
+        status;
+
+
+      await existingOrder.save();
+
+
+      // =====================================
+      // إرسال إشعار للعميل
+      // =====================================
+
+      try {
+
+        const phone =
+          String(
+            existingOrder.customer.phone || ""
+          ).trim();
+
+
+        if (phone) {
+
+          const subscriptions =
+            await PushSubscription.find({
+              phone
+            });
+
+
+          const payload =
+            JSON.stringify({
+
+              title:
+                "ديور للأزياء 🛍️",
+
+              body:
+                `تم تحديث حالة طلبك ${existingOrder.orderNumber} إلى: ${status}`,
+
+              url:
+                "/track-order.html"
+
+            });
+
+
+          for (
+            const item
+            of subscriptions
+          ) {
+
+            try {
+
+              await webpush.sendNotification(
+                item.subscription,
+                payload
+              );
+
+            } catch (pushError) {
+
+              console.error(
+                "Push notification error:",
+                pushError.message
+              );
+
+
+              // الاشتراك انتهى أو أصبح غير صالح
+              if (
+                pushError.statusCode === 404 ||
+                pushError.statusCode === 410
+              ) {
+
+                await PushSubscription.deleteOne({
+                  _id: item._id
+                });
+
+              }
+
+            }
+
+          }
+
+        }
+
+      } catch (notificationError) {
+
+        // لا نريد أن يفشل تحديث الطلب
+        // بسبب مشكلة في الإشعار
+
+        console.error(
+          "Notification error:",
+          notificationError
+        );
+
+      }
+
+
+      // =====================================
+      // الرد للإدارة
+      // =====================================
+
       res.json({
 
         success: true,
 
         message:
-          "تم تحديث حالة الطلب",
+          "تم تحديث حالة الطلب وإرسال الإشعار",
 
         order: {
 
           id:
-            order._id,
+            existingOrder._id,
 
           orderNumber:
-            order.orderNumber,
+            existingOrder.orderNumber,
 
           status:
-            order.status
+            existingOrder.status
 
         }
 
