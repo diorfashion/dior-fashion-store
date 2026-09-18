@@ -38,13 +38,22 @@ router.post("/", async (req, res) => {
       !delivery ||
       !delivery.address
     ) {
+
       return res.status(400).json({
         success: false,
         message: "عنوان التوصيل مطلوب"
       });
     }
 
-
+if (
+  typeof delivery.latitude !== "number" ||
+  typeof delivery.longitude !== "number"
+) {
+  return res.status(400).json({
+    success: false,
+    message: "يجب تحديد موقع التوصيل على الخريطة"
+  });
+}
     if (
       !paymentMethod
     ) {
@@ -284,12 +293,18 @@ router.post("/", async (req, res) => {
           },
 
           delivery: {
-            address:
-              delivery.address,
+  address:
+    delivery.address,
 
-            notes:
-              delivery.notes || ""
-          },
+  latitude:
+    delivery.latitude,
+
+  longitude:
+    delivery.longitude,
+
+  notes:
+    delivery.notes || ""
+},
 
           paymentMethod,
 
