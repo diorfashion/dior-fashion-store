@@ -61,20 +61,20 @@ async function loadOrders() {
 function renderOrder(order) {
   const itemsHtml = (order.items || [])
     .map(item => {
-      const image = item.image || "";
+      const image =
+  item.image &&
+  String(item.image).trim()
+    ? item.image
+    : "/images/logo.jpg";
 
       return `
         <div class="product-line">
-          ${
-            image
-              ? `<img src="${escapeHtml(image)}" alt="">`
-              : `<div style="
-                  width:65px;
-                  height:65px;
-                  border-radius:10px;
-                  background:#eee;
-                "></div>`
-          }
+       <img
+  src="${escapeHtml(image)}"
+  alt="${escapeHtml(item.name || "منتج")}"
+  class="order-product-image"
+  onerror="this.onerror=null;this.src='/images/logo.jpg';"
+>
 
           <div class="product-info">
             <strong>
