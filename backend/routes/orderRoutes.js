@@ -2,11 +2,14 @@ const express = require("express");
 const mongoose = require("mongoose");
 const Product = require("../models/Product");
 const Order = require("../models/Order");
+const requireAdmin = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
 
-// إنشاء طلب
+// ==========================================
+// إنشاء طلب جديد
+// ==========================================
 
 router.post("/", async (req, res) => {
   try {
@@ -20,7 +23,7 @@ router.post("/", async (req, res) => {
     } = req.body;
 
 
-    // التحقق الأساسي
+    // التحقق من بيانات العميل
 
     if (
       !customer ||
@@ -34,35 +37,52 @@ router.post("/", async (req, res) => {
     }
 
 
+    // التحقق من العنوان
+
     if (
       !delivery ||
       !delivery.address
     ) {
-
       return res.status(400).json({
         success: false,
         message: "عنوان التوصيل مطلوب"
       });
     }
 
-if (
-  typeof delivery.latitude !== "number" ||
-  typeof delivery.longitude !== "number"
-) {
-  return res.status(400).json({
-    success: false,
-    message: "يجب تحديد موقع التوصيل على الخريطة"
-  });
-}
+
+    // التحقق من الموقع
+
     if (
-      !paymentMethod
+      typeof delivery.latitude !== "number" ||
+      typeof delivery.longitude !== "number"
     ) {
       return res.status(400).json({
         success: false,
-        message: "طريقة الدفع مطلوبة"
+        message: "يجب تحديد موقع التوصيل على الخريطة"
       });
     }
 
+
+    // طرق الدفع المسموحة
+
+    const allowedPaymentMethods = [
+      "الدفع عند الاستلام",
+      "تحويل بنكي",
+      "محفظة جيب"
+    ];
+
+
+    if (
+      !allowedPaymentMethods.includes(paymentMethod)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "طريقة الدفع غير صحيحة"
+      });
+    }
+
+
+    // التحقق من السلة
 
     if (
       !Array.isArray(items) ||
@@ -76,8 +96,9 @@ if (
 
 
     /*
-      نستخدم transaction حتى لا يحدث
-      خصم جزئي إذا فشل أحد المنتجات.
+      استخدام transaction
+      حتى لا يتم خصم جزء من المخزون
+      إذا حدث خطأ في أحد المنتجات.
     */
 
     const session =
@@ -137,7 +158,9 @@ if (
         let selectedSize = null;
 
 
-        // المنتج لديه مقاسات
+        // =====================================
+        // المنتجات التي لديها مقاسات
+        // =====================================
 
         if (
           product.sizes &&
@@ -175,15 +198,14 @@ if (
           }
 
 
-          // خصم كمية المقاس
-
           selectedSize.quantity -=
             quantity;
 
         } else {
 
-          // للمنتجات القديمة التي
-          // ليس لديها مقاسات
+          // =====================================
+          // المنتجات بدون مقاسات
+          // =====================================
 
           if (
             product.stock <
@@ -200,8 +222,9 @@ if (
         }
 
 
-        // إذا انتهت جميع المقاسات
-        // يصبح المنتج غير متوفر
+        // =====================================
+        // تحديث حالة توفر المنتج
+        // =====================================
 
         const remainingSizes =
           product.sizes &&
@@ -226,6 +249,10 @@ if (
           session
         });
 
+
+        // =====================================
+        // حساب سعر المنتج
+        // =====================================
 
         const itemSubtotal =
           product.price *
@@ -260,8 +287,13 @@ if (
           subtotal:
             itemSubtotal
         });
+
       }
 
+
+      // =====================================
+      // حساب الإجمالي
+      // =====================================
 
       const fee =
         Number(deliveryFee) || 0;
@@ -270,6 +302,10 @@ if (
       const total =
         subtotal + fee;
 
+
+      // =====================================
+      // إنشاء رقم الطلب
+      // =====================================
 
       const orderNumber =
         "DF-" +
@@ -280,8 +316,13 @@ if (
         );
 
 
+      // =====================================
+      // إنشاء الطلب
+      // =====================================
+
       const order =
         new Order({
+
           orderNumber,
 
           customer: {
@@ -293,18 +334,19 @@ if (
           },
 
           delivery: {
-  address:
-    delivery.address,
 
-  latitude:
-    delivery.latitude,
+            address:
+              delivery.address,
 
-  longitude:
-    delivery.longitude,
+            latitude:
+              delivery.latitude,
 
-  notes:
-    delivery.notes || ""
-},
+            longitude:
+              delivery.longitude,
+
+            notes:
+              delivery.notes || ""
+          },
 
           paymentMethod,
 
@@ -333,13 +375,19 @@ if (
       session.endSession();
 
 
+      // =====================================
+      // الرد للمتجر
+      // =====================================
+
       res.status(201).json({
+
         success: true,
 
         message:
           "تم إنشاء الطلب بنجاح",
 
         order: {
+
           id:
             order._id,
 
@@ -349,9 +397,13 @@ if (
           status:
             order.status,
 
+          paymentMethod:
+            order.paymentMethod,
+
           total:
             order.total
         }
+
       });
 
 
@@ -373,13 +425,306 @@ if (
     );
 
     res.status(400).json({
+
       success: false,
+
       message:
         error.message ||
         "تعذر إنشاء الطلب"
+
     });
+
   }
+
 });
+
+
+// ==========================================
+// تتبع الطلب للعميل
+// ==========================================
+//
+// نطلب رقم الطلب + رقم الهاتف
+// حتى لا يستطيع أي شخص رؤية طلب شخص آخر
+//
+
+router.post("/track", async (req, res) => {
+
+  try {
+
+    const {
+      orderNumber,
+      phone
+    } = req.body;
+
+
+    if (
+      !orderNumber ||
+      !phone
+    ) {
+      return res.status(400).json({
+
+        success: false,
+
+        message:
+          "رقم الطلب ورقم الهاتف مطلوبان"
+
+      });
+    }
+
+
+    const order =
+      await Order.findOne({
+
+        orderNumber:
+          orderNumber.trim(),
+
+        "customer.phone":
+          phone.trim()
+
+      }).lean();
+
+
+    if (!order) {
+
+      return res.status(404).json({
+
+        success: false,
+
+        message:
+          "لم يتم العثور على الطلب"
+
+      });
+
+    }
+
+
+    res.json({
+
+      success: true,
+
+      order: {
+
+        orderNumber:
+          order.orderNumber,
+
+        status:
+          order.status,
+
+        paymentMethod:
+          order.paymentMethod,
+
+        items:
+          order.items,
+
+        subtotal:
+          order.subtotal,
+
+        deliveryFee:
+          order.deliveryFee,
+
+        total:
+          order.total,
+
+        createdAt:
+          order.createdAt
+
+      }
+
+    });
+
+
+  } catch (error) {
+
+    console.error(
+      "Track order error:",
+      error
+    );
+
+    res.status(500).json({
+
+      success: false,
+
+      message:
+        "حدث خطأ أثناء البحث عن الطلب"
+
+    });
+
+  }
+
+});
+
+
+// ==========================================
+// جلب جميع الطلبات للإدارة
+// ==========================================
+
+router.get(
+  "/admin",
+  requireAdmin,
+  async (req, res) => {
+
+    try {
+
+      const orders =
+        await Order.find()
+          .sort({
+            createdAt: -1
+          })
+          .lean();
+
+
+      res.json({
+
+        success: true,
+
+        orders
+
+      });
+
+
+    } catch (error) {
+
+      console.error(
+        "Get admin orders error:",
+        error
+      );
+
+      res.status(500).json({
+
+        success: false,
+
+        message:
+          "تعذر تحميل الطلبات"
+
+      });
+
+    }
+
+  }
+);
+
+
+// ==========================================
+// تغيير حالة الطلب
+// ==========================================
+
+router.put(
+  "/admin/:id/status",
+  requireAdmin,
+  async (req, res) => {
+
+    try {
+
+      const {
+        status
+      } = req.body;
+
+
+      const allowedStatuses = [
+
+        "تم الطلب",
+
+        "تأكيد الدفع",
+
+        "جاري التجهيز",
+
+        "التوصيل",
+
+        "تم التوصيل"
+
+      ];
+
+
+      if (
+        !allowedStatuses.includes(status)
+      ) {
+
+        return res.status(400).json({
+
+          success: false,
+
+          message:
+            "حالة الطلب غير صحيحة"
+
+        });
+
+      }
+
+
+      const order =
+        await Order.findByIdAndUpdate(
+
+          req.params.id,
+
+          {
+            status
+          },
+
+          {
+            new: true,
+            runValidators: true
+          }
+
+        ).lean();
+
+
+      if (!order) {
+
+        return res.status(404).json({
+
+          success: false,
+
+          message:
+            "الطلب غير موجود"
+
+        });
+
+      }
+
+
+      res.json({
+
+        success: true,
+
+        message:
+          "تم تحديث حالة الطلب",
+
+        order: {
+
+          id:
+            order._id,
+
+          orderNumber:
+            order.orderNumber,
+
+          status:
+            order.status
+
+        }
+
+      });
+
+
+    } catch (error) {
+
+      console.error(
+        "Update order status error:",
+        error
+      );
+
+      res.status(400).json({
+
+        success: false,
+
+        message:
+          "تعذر تحديث حالة الطلب"
+
+      });
+
+    }
+
+  }
+);
 
 
 module.exports = router;
