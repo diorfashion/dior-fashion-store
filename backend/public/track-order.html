@@ -235,6 +235,62 @@
       padding: 30px 10px;
       color: #666;
     }
+    /* ==========================================
+   إشعارات الطلب
+========================================== */
+
+.push-notification-box {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.enable-notifications-button {
+  width: 100%;
+  border: none;
+  padding: 14px 16px;
+  border-radius: 12px;
+
+  background: #111;
+  color: white;
+
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition:
+    opacity .2s ease,
+    transform .2s ease;
+}
+
+.enable-notifications-button:hover {
+  opacity: .9;
+}
+
+.enable-notifications-button:active {
+  transform: scale(.98);
+}
+
+.enable-notifications-button:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.notification-message {
+  margin: 10px 0 0;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1.7;
+}
+
+.notification-message.success {
+  color: #198754;
+}
+
+.notification-message.error {
+  color: #c62828;
+}
 
     .hidden {
       display: none;
@@ -307,7 +363,20 @@
         >
           🔎 عرض طلباتي
         </button>
+<!-- تفعيل إشعارات الطلب -->
+<div class="push-notification-box">
 
+  <button
+    type="button"
+    id="enableNotificationsButton"
+    class="enable-notifications-button"
+  >
+    🔔 تفعيل إشعارات الطلب
+  </button>
+
+  <p id="notificationMessage" class="notification-message"></p>
+
+</div>
         <div
           id="trackMessage"
           class="track-message"
