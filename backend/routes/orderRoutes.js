@@ -440,75 +440,56 @@ router.post("/", async (req, res) => {
 
 
 // ==========================================
-// تتبع الطلب للعميل
+// جلب جميع طلبات العميل بواسطة رقم الهاتف
 // ==========================================
-//
-// نطلب رقم الطلب + رقم الهاتف
-// حتى لا يستطيع أي شخص رؤية طلب شخص آخر
-//
 
-router.post("/track", async (req, res) => {
+router.get("/my-orders", async (req, res) => {
 
   try {
 
-    const {
-      orderNumber,
-      phone
-    } = req.body;
+    const phone = String(
+      req.query.phone || ""
+    ).trim();
 
 
-    if (
-      !orderNumber ||
-      !phone
-    ) {
+    if (!phone) {
+
       return res.status(400).json({
 
         success: false,
 
         message:
-          "رقم الطلب ورقم الهاتف مطلوبان"
+          "رقم الهاتف مطلوب"
 
       });
+
     }
 
 
-    const order =
-      await Order.findOne({
-
-        orderNumber:
-          orderNumber.trim(),
+    const orders =
+      await Order.find({
 
         "customer.phone":
-          phone.trim()
+          phone
 
-      }).lean();
-
-
-    if (!order) {
-
-      return res.status(404).json({
-
-        success: false,
-
-        message:
-          "لم يتم العثور على الطلب"
-
-      });
-
-    }
+      })
+      .sort({
+        createdAt: -1
+      })
+      .lean();
 
 
     res.json({
 
       success: true,
 
-      order: {
+      orders: orders.map(order => ({
 
         orderNumber:
           order.orderNumber,
 
-        status:
-          order.status,
+        customer:
+          order.customer,
 
         paymentMethod:
           order.paymentMethod,
@@ -525,10 +506,16 @@ router.post("/track", async (req, res) => {
         total:
           order.total,
 
+        status:
+          order.status,
+
+        delivery:
+          order.delivery,
+
         createdAt:
           order.createdAt
 
-      }
+      }))
 
     });
 
@@ -536,16 +523,17 @@ router.post("/track", async (req, res) => {
   } catch (error) {
 
     console.error(
-      "Track order error:",
+      "Get customer orders error:",
       error
     );
+
 
     res.status(500).json({
 
       success: false,
 
       message:
-        "حدث خطأ أثناء البحث عن الطلب"
+        "حدث خطأ أثناء تحميل الطلبات"
 
     });
 
