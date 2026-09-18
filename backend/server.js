@@ -39,6 +39,10 @@ app.use(
   "/api/products",
   require("./routes/productRoutes")
 );
+app.use(
+  "/api/orders",
+  require("./routes/orderRoutes")
+);
 
 
 // الصفحة الرئيسية
