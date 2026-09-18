@@ -327,7 +327,14 @@ function toggleCustomerDeliveredOrder(orderId) {
   }
 }
 
-
+function escapeJs(value) {
+  return String(value ?? "")
+    .replace(/\\/g, "\\\\")
+    .replace(/'/g, "\\'")
+    .replace(/"/g, '\\"')
+    .replace(/\r/g, "\\r")
+    .replace(/\n/g, "\\n");
+}
 function formatMoney(value) {
 
   return Number(
